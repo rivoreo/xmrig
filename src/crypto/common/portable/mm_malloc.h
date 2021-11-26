@@ -25,10 +25,15 @@
 #ifndef XMRIG_MM_MALLOC_PORTABLE_H
 #define XMRIG_MM_MALLOC_PORTABLE_H
 
+#if defined __i386__ || defined __amd64__ || defined _M_IX86 || defined _M_AMD64 || defined __x86_64 || defined __x86_64__
+# if defined(_WIN32) && !defined(__GNUC__)
+#  include <malloc.h>
+# else
+#  include <mm_malloc.h>
+# endif
+#else
 
-#if defined(XMRIG_ARM) && !defined(__clang__)
 #include <stdlib.h>
-
 
 #ifndef __cplusplus
 extern
@@ -61,11 +66,6 @@ static __inline__ void __attribute__((__always_inline__)) _mm_free(void *__p)
 {
     free(__p);
 }
-#elif defined(_WIN32) && !defined(__GNUC__)
-#   include <malloc.h>
-#else
-#   include <mm_malloc.h>
 #endif
-
 
 #endif /* XMRIG_MM_MALLOC_PORTABLE_H */

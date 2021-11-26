@@ -23,18 +23,19 @@
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define __STDC_CONSTANT_MACROS
+#define __STDC_LIMIT_MACROS
 #include <stdio.h>
-
-
 #include "backend/cpu/Cpu.h"
 #include "crypto/cn/CnHash.h"
 #include "crypto/common/VirtualMemory.h"
 
-
-#if defined(XMRIG_ARM)
+#if defined __arm__ || defined __aarch64__ || defined __ARM_ARCH || defined __ARMEL__ || defined __AARCH64EL__
 #   include "crypto/cn/CryptoNight_arm.h"
-#else
+#elif defined __i386__ || defined __amd64__ || defined _M_IX86 || defined _M_AMD64 || defined __x86_64 || defined __x86_64__
 #   include "crypto/cn/CryptoNight_x86.h"
+#else
+#   include "crypto/cn/CryptoNight_generic.h"
 #endif
 
 
@@ -56,7 +57,7 @@
     m_map[algo][AV_PENTA_SOFT][Assembly::NONE]  = cryptonight_penta_hash<algo,  true>;
 
 
-#ifdef XMRIG_FEATURE_ASM
+#if (defined __i386 || defined __i386__ || defined __X86__ || defined __amd64 || defined __x86_64 || defined __amd64 || defined __amd64__) && defined XMRIG_FEATURE_ASM
 #   define ADD_FN_ASM(algo) \
     m_map[algo][AV_SINGLE][Assembly::INTEL]     = cryptonight_single_hash_asm<algo, Assembly::INTEL>;     \
     m_map[algo][AV_SINGLE][Assembly::RYZEN]     = cryptonight_single_hash_asm<algo, Assembly::RYZEN>;     \
@@ -204,6 +205,7 @@ static void patchAsmVariants()
 } // namespace xmrig
 #else
 #   define ADD_FN_ASM(algo)
+static void patchAsmVariants() {}
 #endif
 
 

@@ -26,13 +26,23 @@
  */
 #pragma once
 
+#if defined __arm__ || defined __aarch64__ || defined __ARM_ARCH || defined __ARMEL__ || defined __AARCH64EL__
+#define XMRIG_ARM
+#endif
 
 #if defined(XMRIG_ARM)
 #   include "crypto/cn/SSE2NEON.h"
-#elif defined(__GNUC__)
-#   include <x86intrin.h>
+#elif defined __i386__ || defined __amd64__ || defined _M_IX86 || defined _M_AMD64 || defined __x86_64 || defined __x86_64__
+#   if defined(__GNUC__)
+#      include <x86intrin.h>
+#   else
+#      include <intrin.h>
+#   endif
 #else
-#   include <intrin.h>
+#   define __STDC_CONSTANT_MACROS
+#   define __STDC_LIMIT_MACROS
+#   define SIMDE_ENABLE_NATIVE_ALIASES
+//#   include <simde/x86/sse2.h>
 #endif
 
 #include <inttypes.h>
@@ -139,8 +149,8 @@ static inline uint32_t _rotr(uint32_t value, uint32_t amount)
 #endif
 #else
 #ifndef _rotr
-//#define _rotr(value,amount) ((value)>>(amount)) | ((value)<<((32-(amount))&31))
-#define _rotr(_value,_amount) ({ uint32_t v = (value), a = (amount); (v >> a) | (v << ((32-a) & 31))})
+#define _rotr(value,amount) ((value)>>(amount)) | ((value)<<((32-(amount))&31))
+//#define _rotr(_value,_amount) ({ uint32_t v = (_value), a = (_amount); (v >> a) | (v << ((32-a) & 31))})
 #endif
 #endif
 

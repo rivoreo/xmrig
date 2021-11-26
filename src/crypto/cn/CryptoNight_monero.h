@@ -29,6 +29,10 @@
 #include <fenv.h>
 #include <math.h>
 
+#if defined __arm__ || defined __aarch64__ || defined __ARM_ARCH || defined __ARMEL__ || defined __AARCH64EL__
+#define XMRIG_ARM
+#endif
+
 // VARIANT ALTERATIONS
 #ifndef XMRIG_ARM
 #   define VARIANT1_INIT(part) \

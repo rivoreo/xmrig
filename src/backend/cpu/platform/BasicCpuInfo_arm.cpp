@@ -41,13 +41,13 @@ xmrig::BasicCpuInfo::BasicCpuInfo() :
     m_aes(false),
     m_avx2(false)
 {
-#   ifdef XMRIG_ARMv8
+#if defined __aarch64__ || defined __AARCH64EL__
     memcpy(m_brand, "ARMv8", 5);
 #   else
     memcpy(m_brand, "ARMv7", 5);
 #   endif
 
-#   if __ARM_FEATURE_CRYPTO
+#   if __ARM_FEATURE_CRYPTO && 0
 #   if !defined(__APPLE__)
     m_aes = getauxval(AT_HWCAP) & HWCAP_AES;
 #   else
