@@ -27,8 +27,9 @@
 
 #include <stdlib.h>
 #include <sys/mman.h>
-
-
+#if !defined MAP_HUGETLB && defined __GLIBC__ && defined __linux__
+#include <asm/mman.h>
+#endif
 #include "crypto/common/portable/mm_malloc.h"
 #include "crypto/common/VirtualMemory.h"
 
