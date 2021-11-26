@@ -4,18 +4,23 @@ DEFINES += -D HAVE_SYSLOG_H=1 -D NDEBUG=1 -D _GNU_SOURCE=1 -D __STDC_FORMAT_MACR
 # Linking to OpenSSL creates license issues, disable it for now
 DEFINES += -D XMRIG_NO_TLS=1
 DEFINES += -D XMRIG_NO_API=1 -D XMRIG_NO_HTTPD=1
-DEFINES += -D RAPIDJSON_SSE2=1
-INCLUDE_PATHS += -Isrc/3rdparty/libcpuid -Isrc -Isrc/3rdparty
+#DEFINES += -D RAPIDJSON_SSE2=1
+INCLUDE_PATHS += -I src -I src/3rdparty
 CFLAGS += $(DEFINES) $(INCLUDE_PATHS) -Wall -std=gnu99 -O3
 #CXXFLAGS += $(DEFINES) $(INCLUDE_PATHS) -D_GLIBCXX_USE_NANOSLEEP -D_GLIBCXX_USE_SCHED_YIELD -Wall -maes -std=gnu++0x -O3 -DNDEBUG -funroll-loops -fvariable-expansion-in-unroller -fmerge-all-constants -fbranch-target-load-optimize2
-CXXFLAGS += $(DEFINES) $(INCLUDE_PATHS) -D_GLIBCXX_USE_NANOSLEEP -D_GLIBCXX_USE_SCHED_YIELD -Wall -maes -std=gnu++0x -O3 -DNDEBUG -funroll-loops -fmerge-all-constants
-#CXXFLAGS += $(DEFINES) $(INCLUDE_PATHS) -D_GLIBCXX_USE_NANOSLEEP -D_GLIBCXX_USE_SCHED_YIELD -Wall -std=gnu++0x -Os -DNDEBUG -funroll-loops -fmerge-all-constants
-#CXXFLAGS += -Dnullptr=__null -Dconstexpr=const "-Dalignas(b)=" -Doverride= -fpermissive
-CXXFLAGS += "-Dalignas(b)=__attribute__((__aligned__))"
+#CXXFLAGS += $(DEFINES) $(INCLUDE_PATHS) -D_GLIBCXX_USE_NANOSLEEP -D_GLIBCXX_USE_SCHED_YIELD -Wall -maes -std=gnu++0x -O3 -DNDEBUG -funroll-loops -fmerge-all-constants
+CXXFLAGS += $(DEFINES) $(INCLUDE_PATHS) -D_GLIBCXX_USE_NANOSLEEP -D_GLIBCXX_USE_SCHED_YIELD -Wall -std=gnu++0x -O3 -DNDEBUG -funroll-loops -fmerge-all-constants
+#CXXFLAGS += -Dnullptr=__null -Dconstexpr=const -Doverride= -fpermissive
+CXXFLAGS += -D "alignas(b)=__attribute__((__aligned__))"
 LIBS += -l uv -l pthread
 
 # Need for FreeBSD
 #LIBS += -lkvm
+
+ifndef ARCH
+GET_ARCH_COMMAND := arch=`uname -m` && case $$arch in i?86|i86*|amd64|x86_64) echo x86; ;; arm*|aarch64) echo arm; ;; *) echo $$arch; ;; esac
+ARCH := $(shell $(GET_ARCH_COMMAND))
+endif
 
 SOURCES = \
     src/base/io/json/Json.cpp \
@@ -123,6 +128,7 @@ SOURCES += \
 	src/App_unix.cpp \
 	src/crypto/common/VirtualMemory_unix.cpp
 
+ifdef WITH_RANDOMX
 DEFINES += -D XMRIG_ALGO_RANDOMX=1
 SOURCES += \
 	src/crypto/randomx/aes_hash.cpp \
@@ -149,9 +155,13 @@ SOURCES += \
 	src/crypto/rx/RxCache.cpp \
 	src/crypto/rx/RxConfig.cpp \
 	src/crypto/rx/RxDataset.cpp \
-	src/crypto/rx/RxVm.cpp \
+	src/crypto/rx/RxVm.cpp
+ifeq ($(ARCH),x86)
+SOURCES += \
 	src/crypto/randomx/jit_compiler_x86_static.S \
 	src/crypto/randomx/jit_compiler_x86.cpp
+endif
+endif
 
 ifdef WITH_ARGON2
 DEFINES += -D XMRIG_ALGO_ARGON2=1
@@ -185,6 +195,7 @@ endif	# WITH_ASM
 
 ifdef WITH_LIBCPUID
 DEFINES += -D XMRIG_FEATURE_LIBCPUID=1
+INCLUDE_PATHS += -I src/3rdparty/libcpuid
 SOURCES += src/backend/cpu/platform/AdvancedCpuInfo.cpp
 #LIBS += -l cpuid
 DEPENDS += src/3rdparty/libcpuid/libcpuid.a
@@ -192,11 +203,11 @@ LIBS += src/3rdparty/libcpuid/libcpuid.a
 else
 DEFINES += -D XMRIG_NO_LIBCPUID=1
 #SOURCES += src/common/cpu/Cpu.cpp
-ifeq ($(ARCH),arm)
-SOURCES += src/backend/cpu/platform/BasicCpuInfo_arm.cpp
-else
+#ifeq ($(ARCH),arm)
+#SOURCES += src/backend/cpu/platform/BasicCpuInfo_arm.cpp
+#else
 SOURCES += src/backend/cpu/platform/BasicCpuInfo.cpp
-endif
+#endif
 endif
 
 OBJECTS = $(addsuffix .o,$(basename $(SOURCES)))

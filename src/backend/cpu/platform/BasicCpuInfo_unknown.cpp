@@ -4,10 +4,9 @@
  * Copyright 2014      Lucas Jones <https://github.com/lucasjones>
  * Copyright 2014-2016 Wolf9466    <https://github.com/OhGodAPet>
  * Copyright 2016      Jay D Dee   <jayddee246@gmail.com>
- * Copyright 2017-2018 XMR-Stak    <https://github.com/fireice-uk>, <https://github.com/psychocrypt>
- * Copyright 2018      Lee Clagett <https://github.com/vtnerd>
+ * Copyright 2017-2019 XMR-Stak    <https://github.com/fireice-uk>, <https://github.com/psychocrypt>
  * Copyright 2018-2019 SChernykh   <https://github.com/SChernykh>
- * Copyright 2016-2018 XMRig       <https://github.com/xmrig>, <support@xmrig.com>
+ * Copyright 2016-2019 XMRig       <support@xmrig.com>
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -23,42 +22,24 @@
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef XMRIG_CRYPTONIGHT_H
-#define XMRIG_CRYPTONIGHT_H
+#include "backend/cpu/platform/BasicCpuInfo.h"
+#include <thread>
+#include <string.h>
+
+xmrig::BasicCpuInfo::BasicCpuInfo() :
+    m_brand(),
+    m_threads(std::thread::hardware_concurrency()),
+    m_aes(false),
+    m_avx2(false) {
+	memcpy(m_brand, "Unknown", 7);
+}
 
 
-#include <stddef.h>
-#include <stdint.h>
-
-//#if defined _MSC_VER || defined XMRIG_ARM
-#   define ABI_ATTRIBUTE
-//#else
-//#   define ABI_ATTRIBUTE __attribute__((ms_abi))
-//#endif
+const char *xmrig::BasicCpuInfo::backend() const {
+	return "basic_unknown";
+}
 
 
-struct cryptonight_ctx;
-typedef void(*cn_mainloop_fun_ms_abi)(cryptonight_ctx**) ABI_ATTRIBUTE;
-
-
-struct cryptonight_r_data {
-    int algo;
-    uint64_t height;
-
-    bool match(const int a, const uint64_t h) const { return (a == algo) && (h == height); }
-};
-
-
-struct cryptonight_ctx {
-    alignas(16) uint8_t state[224];
-    alignas(16) uint8_t *memory;
-
-    uint8_t unused[40];
-    const uint32_t *saes_table;
-
-    cn_mainloop_fun_ms_abi generated_code;
-    cryptonight_r_data generated_code_data;
-};
-
-
-#endif /* XMRIG_CRYPTONIGHT_H */
+xmrig::CpuThreads xmrig::BasicCpuInfo::threads(const Algorithm &) const {
+	return CpuThreads(threads());
+}
