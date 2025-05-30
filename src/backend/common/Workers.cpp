@@ -29,6 +29,12 @@
 #include "backend/common/Workers.h"
 #include "backend/cpu/CpuWorker.h"
 #include "base/io/log/Log.h"
+#include "base/tools/Object.h"
+
+
+#ifdef XMRIG_FEATURE_OPENCL
+#   include "backend/opencl/OclWorker.h"
+#endif
 
 
 namespace xmrig {
@@ -37,9 +43,10 @@ namespace xmrig {
 class WorkersPrivate
 {
 public:
-    inline WorkersPrivate()
-    {
-    }
+    XMRIG_DISABLE_COPY_MOVE(WorkersPrivate)
+
+
+    WorkersPrivate() = default;
 
 
     inline ~WorkersPrivate()
@@ -93,6 +100,7 @@ void xmrig::Workers<T>::start(const std::vector<T> &data)
     }
 
     d_ptr->hashrate = new Hashrate(m_workers.size());
+    Nonce::touch(T::backend());
 
     for (Thread<T> *worker : m_workers) {
         worker->start(Workers<T>::onReady);
@@ -126,10 +134,10 @@ void xmrig::Workers<T>::tick(uint64_t)
 
     for (Thread<T> *handle : m_workers) {
         if (!handle->worker()) {
-            return;
+            continue;
         }
 
-        d_ptr->hashrate->add(handle->index(), handle->worker()->hashCount(), handle->worker()->timestamp());
+        d_ptr->hashrate->add(handle->id(), handle->worker()->hashCount(), handle->worker()->timestamp());
     }
 
     d_ptr->hashrate->updateHighest();
@@ -137,7 +145,7 @@ void xmrig::Workers<T>::tick(uint64_t)
 
 
 template<class T>
-xmrig::IWorker *xmrig::Workers<T>::create(Thread<CpuLaunchData> *)
+xmrig::IWorker *xmrig::Workers<T>::create(Thread<T> *)
 {
     return nullptr;
 }
@@ -146,17 +154,24 @@ xmrig::IWorker *xmrig::Workers<T>::create(Thread<CpuLaunchData> *)
 template<class T>
 void xmrig::Workers<T>::onReady(void *arg)
 {
-    Thread<T> *handle = static_cast<Thread<T>* >(arg);
+    auto handle = static_cast<Thread<T>* >(arg);
 
     IWorker *worker = create(handle);
+    assert(worker != nullptr);
+
     if (!worker || !worker->selfTest()) {
-        XMRIG_LOG_ERR("thread %zu error: \"hash self-test failed\".", worker->id());
+        XMRIG_LOG_ERR("%s " RED("thread ") RED_BOLD("#%zu") RED(" self-test failed"), T::tag(), worker->id());
+
+        handle->backend()->start(worker, false);
+        delete worker;
 
         return;
     }
 
+    assert(handle->backend() != nullptr);
+
     handle->setWorker(worker);
-    handle->backend()->start(worker);
+    handle->backend()->start(worker, true);
 }
 
 
@@ -168,19 +183,19 @@ xmrig::IWorker *xmrig::Workers<CpuLaunchData>::create(Thread<CpuLaunchData> *han
 {
     switch (handle->config().intensity) {
     case 1:
-        return new CpuWorker<1>(handle->index(), handle->config());
+        return new CpuWorker<1>(handle->id(), handle->config());
 
     case 2:
-        return new CpuWorker<2>(handle->index(), handle->config());
+        return new CpuWorker<2>(handle->id(), handle->config());
 
     case 3:
-        return new CpuWorker<3>(handle->index(), handle->config());
+        return new CpuWorker<3>(handle->id(), handle->config());
 
     case 4:
-        return new CpuWorker<4>(handle->index(), handle->config());
+        return new CpuWorker<4>(handle->id(), handle->config());
 
     case 5:
-        return new CpuWorker<5>(handle->index(), handle->config());
+        return new CpuWorker<5>(handle->id(), handle->config());
     }
 
     return nullptr;
@@ -188,6 +203,18 @@ xmrig::IWorker *xmrig::Workers<CpuLaunchData>::create(Thread<CpuLaunchData> *han
 
 
 template class Workers<CpuLaunchData>;
+
+
+#ifdef XMRIG_FEATURE_OPENCL
+template<>
+xmrig::IWorker *xmrig::Workers<OclLaunchData>::create(Thread<OclLaunchData> *handle)
+{
+    return new OclWorker(handle->id(), handle->config());
+}
+
+
+template class Workers<OclLaunchData>;
+#endif
 
 
 } // namespace xmrig

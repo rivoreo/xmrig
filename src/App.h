@@ -28,6 +28,7 @@
 
 
 #include "base/kernel/interfaces/ISignalListener.h"
+#include "base/tools/Object.h"
 
 
 namespace xmrig {
@@ -42,6 +43,8 @@ class Signals;
 class App : public ISignalListener
 {
 public:
+    XMRIG_DISABLE_COPY_MOVE_DEFAULT(App)
+
     App(Process *process);
     ~App() noexcept override;
 
@@ -51,11 +54,11 @@ protected:
     void onSignal(int signum) override;
 
 private:
-    void background();
+    bool background(int &rc);
     void close();
 
-    Controller *m_controller;
-    Signals *m_signals;
+    Controller *m_controller    = nullptr;
+    Signals *m_signals          = nullptr;
 };
 
 

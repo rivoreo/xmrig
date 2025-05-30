@@ -24,7 +24,7 @@
  */
 
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <uv.h>
 
 
@@ -41,14 +41,9 @@
 #include "version.h"
 
 
-xmrig::App::App(Process *process) :
-    m_signals(nullptr)
+xmrig::App::App(Process *process)
 {
     m_controller = new Controller(process);
-    if (m_controller->init() != 0) {
-        return;
-    }
-
 }
 
 
@@ -62,12 +57,22 @@ xmrig::App::~App() noexcept
 int xmrig::App::exec()
 {
     if (!m_controller->isReady()) {
+        XMRIG_LOG_EMERG("no valid configuration found.");
+
         return 2;
     }
 
     m_signals = new Signals(this);
 
-    background();
+    int rc = 0;
+    if (background(rc)) {
+        return rc;
+    }
+
+    rc = m_controller->init();
+    if (rc != 0) {
+        return rc;
+    }
 
     VirtualMemory::init(m_controller->config()->cpu().isHugePages());
 
@@ -81,10 +86,10 @@ int xmrig::App::exec()
 
     m_controller->start();
 
-    const int r = uv_run(uv_default_loop(), UV_RUN_DEFAULT);
+    rc = uv_run(uv_default_loop(), UV_RUN_DEFAULT);
     uv_loop_close(uv_default_loop());
 
-    return r;
+    return rc;
 }
 
 

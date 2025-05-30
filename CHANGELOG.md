@@ -1,3 +1,34 @@
+# v4.2.1-beta
+- [#1150](https://github.com/xmrig/xmrig/issues/1150) Fixed build on FreeBSD.
+- [#1175](https://github.com/xmrig/xmrig/issues/1175) Fixed support for systems where total count of NUMA nodes not equal usable nodes count.
+- [#1199](https://github.com/xmrig/xmrig/issues/1199) Fixed excessive memory allocation for OpenCL threads with low intensity.
+- [#1212](https://github.com/xmrig/xmrig/issues/1212) Fixed low RandomX performance after fast algorithm switching.
+
+# v4.2.0-beta
+- [#1202](https://github.com/xmrig/xmrig/issues/1202) Fixed algorithm verification in donate strategy.
+- Added per pool option `coin` with single possible value `monero` for pools without algorithm negotiation, for upcoming Monero fork.
+- Added config option `cpu/max-threads-hint` and command line option `--cpu-max-threads-hint`.
+
+# v4.1.0-beta
+- **OpenCL backend disabled by default.**.
+- [#1183](https://github.com/xmrig/xmrig/issues/1183) Fixed compatibility with systemd.
+- [#1185](https://github.com/xmrig/xmrig/pull/1185) Added JIT compiler for RandomX on ARMv8.
+- Improved API endpoint `GET /2/backends` and added support for this endpoint to [workers.xmrig.info](http://workers.xmrig.info).
+- Added command line option `--no-cpu` to disable CPU backend.
+- Added OpenCL specific command line options: `--opencl`, `--opencl-devices`, `--opencl-platform`, `--opencl-loader` and `--opencl-no-cache`.
+- Removed command line option `--http-enabled`, HTTP API enabled automatically if any other `--http-*` option provided.
+
+# v4.0.1-beta
+- [#1177](https://github.com/xmrig/xmrig/issues/1177) Fixed compatibility with old AMD drivers.
+- [#1180](https://github.com/xmrig/xmrig/issues/1180) Fixed possible duplicated shares after algorithm switching.
+- Added support for case if not all backend threads successfully started.
+- Fixed wrong config file permissions after write (only gcc builds on recent Windows 10 affected).
+
+# v4.0.0-beta
+- [#1172](https://github.com/xmrig/xmrig/issues/1172) **Added OpenCL mining backend.**
+  - [#268](https://github.com/xmrig/xmrig-amd/pull/268) [#270](https://github.com/xmrig/xmrig-amd/pull/270) [#271](https://github.com/xmrig/xmrig-amd/pull/271) [#273](https://github.com/xmrig/xmrig-amd/pull/273) [#274](https://github.com/xmrig/xmrig-amd/pull/274) [#1171](https://github.com/xmrig/xmrig/pull/1171) Added RandomX support for OpenCL, thanks [@SChernykh](https://github.com/SChernykh).
+- Algorithm `cn/wow` removed, as no longer alive. 
+
 # v3.2.0
 - Added per pool option `coin` with single possible value `monero` for pools without algorithm negotiation, for upcoming Monero fork.
 - [#1183](https://github.com/xmrig/xmrig/issues/1183) Fixed compatibility with systemd.

@@ -29,6 +29,12 @@
 
 #include "backend/common/Thread.h"
 #include "backend/cpu/CpuLaunchData.h"
+#include "base/tools/Object.h"
+
+
+#ifdef XMRIG_FEATURE_OPENCL
+#   include "backend/opencl/OclLaunchData.h"
+#endif
 
 
 namespace xmrig {
@@ -42,6 +48,8 @@ template<class T>
 class Workers
 {
 public:
+    XMRIG_DISABLE_COPY_MOVE(Workers)
+
     Workers();
     ~Workers();
 
@@ -52,7 +60,7 @@ public:
     void tick(uint64_t ticks);
 
 private:
-    static IWorker *create(Thread<CpuLaunchData> *handle);
+    static IWorker *create(Thread<T> *handle);
     static void onReady(void *arg);
 
     std::vector<Thread<T> *> m_workers;
@@ -62,9 +70,14 @@ private:
 
 template<>
 IWorker *Workers<CpuLaunchData>::create(Thread<CpuLaunchData> *handle);
-
-
 extern template class Workers<CpuLaunchData>;
+
+
+#ifdef XMRIG_FEATURE_OPENCL
+template<>
+IWorker *Workers<OclLaunchData>::create(Thread<OclLaunchData> *handle);
+extern template class Workers<OclLaunchData>;
+#endif
 
 
 } // namespace xmrig

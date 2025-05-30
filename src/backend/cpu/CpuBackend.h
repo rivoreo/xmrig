@@ -26,10 +26,11 @@
 #define XMRIG_CPUBACKEND_H
 
 
-#include <utility>
-
-
 #include "backend/common/interfaces/IBackend.h"
+#include "base/tools/Object.h"
+
+
+#include <utility>
 
 
 namespace xmrig {
@@ -43,10 +44,10 @@ class Miner;
 class CpuBackend : public IBackend
 {
 public:
+    XMRIG_DISABLE_COPY_MOVE_DEFAULT(CpuBackend)
+
     CpuBackend(Controller *controller);
     ~CpuBackend() noexcept override;
-
-    std::pair<unsigned, unsigned> hugePages() const;
 
 protected:
     bool isEnabled() const override;
@@ -57,12 +58,13 @@ protected:
     void prepare(const Job &nextJob) override;
     void printHashrate(bool details) override;
     void setJob(const Job &job) override;
-    void start(IWorker *worker) override;
+    void start(IWorker *worker, bool ready) override;
     void stop() override;
     void tick(uint64_t ticks) override;
 
 #   ifdef XMRIG_FEATURE_API
     rapidjson::Value toJSON(rapidjson::Document &doc) const override;
+    void handleRequest(IApiRequest &request) override;
 #   endif
 
 private:
