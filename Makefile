@@ -60,7 +60,7 @@ SOURCES += \
 else
 SOURCES += \
 	src/base/io/json/Json_unix.cpp \
-	src/base/kernel//Platform_unix.cpp
+	src/base/kernel/Platform_unix.cpp
 endif
 
 DEFINES += -D HAVE_SYSLOG_H=1
@@ -168,7 +168,9 @@ SOURCES += \
 endif
 endif	# WITH_ASM
 ifdef WITH_HWLOC
-SOURCES += src/crypto/rx/RxConfig_hwloc.cpp
+SOURCES += \
+	src/crypto/rx/RxNUMAStorage.cpp \
+	src/crypto/rx/RxConfig_hwloc.cpp
 else
 SOURCES += src/crypto/rx/RxConfig_basic.cpp
 endif	# WITH_HWLOC
@@ -204,13 +206,26 @@ else
 DEFINES += -D XMRIG_NO_ASM=1
 endif	# WITH_ASM
 
+ifdef WITH_HWLOC
+DEFINES += -D XMRIG_FEATURE_HWLOC=1
+LIBS += -l hwloc
+SOURCES += \
+	src/base/kernel/Platform_hwloc.cpp \
+	src/crypto/common/NUMAMemoryPool.cpp \
+	src/crypto/common/VirtualMemory_hwloc.cpp \
+	src/backend/cpu/platform/HwlocCpuInfo.cpp
+endif
+
 ifdef WITH_LIBCPUID
 DEFINES += -D XMRIG_FEATURE_LIBCPUID=1
 INCLUDE_PATHS += -I src/3rdparty/libcpuid
-SOURCES += src/backend/cpu/platform/AdvancedCpuInfo.cpp
 #LIBS += -l cpuid
 DEPENDS += src/3rdparty/libcpuid/libcpuid.a
 LIBS += src/3rdparty/libcpuid/libcpuid.a
+SOURCES += src/backend/cpu/platform/AdvancedCpuInfo.cpp
+ifdef WITH_HWLOC
+SOURCES += src/backend/cpu/platform/BasicCpuInfo.cpp
+endif
 else
 DEFINES += -D XMRIG_NO_LIBCPUID=1
 #SOURCES += src/common/cpu/Cpu.cpp

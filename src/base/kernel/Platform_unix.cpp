@@ -51,23 +51,24 @@
 typedef cpuset_t cpu_set_t;
 #endif
 
+#ifdef __x86_64__
+#define MACHINE "x86_64"
+#elif defined __aarch64__
+#define MACHINE "aarch64"
+#elif defined __arm__
+#define MACHINE "arm"
+#elif defined __i386__
+#define MACHINE "i386"
+#else
+#define MACHINE "unknown"
+#endif
 
 char *xmrig::Platform::createUserAgent()
 {
     constexpr const size_t max = 256;
 
     char *buf = new char[max]();
-    int length = snprintf(buf, max, "%s/%s (Linux ", APP_NAME, APP_VERSION);
-
-#   if defined(__x86_64__)
-    length += snprintf(buf + length, max - length, "x86_64) libuv/%s", uv_version_string());
-#   elif defined(__aarch64__)
-    length += snprintf(buf + length, max - length, "aarch64) libuv/%s", uv_version_string());
-#   elif defined(__arm__)
-    length += snprintf(buf + length, max - length, "arm) libuv/%s", uv_version_string());
-#   else
-    length += snprintf(buf + length, max - length, "i686) libuv/%s", uv_version_string());
-#   endif
+    int length = snprintf(buf, max, "%s/%s (Linux %s) libuv/%s", APP_NAME, APP_VERSION, MACHINE, uv_version_string());
 
 #   ifdef XMRIG_NVIDIA_PROJECT
     const int cudaVersion = cuda_get_runtime_version();

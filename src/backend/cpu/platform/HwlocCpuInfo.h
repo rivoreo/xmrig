@@ -26,6 +26,9 @@
 #define XMRIG_HWLOCCPUINFO_H
 
 
+#ifdef XMRIG_FEATURE_LIBCPUID
+#include "backend/cpu/platform/AdvancedCpuInfo.h"
+#endif
 #include "backend/cpu/platform/BasicCpuInfo.h"
 #include "base/tools/Object.h"
 
