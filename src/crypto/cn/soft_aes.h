@@ -42,7 +42,7 @@
 #   define __STDC_CONSTANT_MACROS
 #   define __STDC_LIMIT_MACROS
 #   define SIMDE_ENABLE_NATIVE_ALIASES
-//#   include <simde/x86/sse2.h>
+#   include <simde/x86/sse2.h>
 #endif
 
 #include <inttypes.h>
