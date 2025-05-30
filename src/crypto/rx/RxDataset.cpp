@@ -25,9 +25,9 @@
  */
 
 
+#include "crypto/randomx/randomx.h"
 #include "crypto/rx/RxDataset.h"
 #include "crypto/common/VirtualMemory.h"
-#include "crypto/randomx/randomx.h"
 #include "crypto/rx/RxAlgo.h"
 #include "crypto/rx/RxCache.h"
 

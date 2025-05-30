@@ -45,7 +45,7 @@ public:
     XMRIG_DISABLE_COPY_MOVE(RxBasicStorage);
 
     RxBasicStorage();
-    ~RxBasicStorage() override;
+    ~RxBasicStorage() noexcept override;
 
 protected:
     RxDataset *dataset(const Job &job, uint32_t nodeId) const override;

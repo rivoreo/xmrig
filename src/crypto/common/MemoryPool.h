@@ -44,7 +44,7 @@ public:
     XMRIG_DISABLE_COPY_MOVE_DEFAULT(MemoryPool)
 
     MemoryPool(size_t size, bool hugePages, uint32_t node = 0);
-    ~MemoryPool() override;
+    ~MemoryPool() noexcept override;
 
 protected:
     bool isHugePages(uint32_t node) const override;

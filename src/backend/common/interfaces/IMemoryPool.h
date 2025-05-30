@@ -38,7 +38,7 @@ namespace xmrig {
 class IMemoryPool
 {
 public:
-    virtual ~IMemoryPool() = default;
+    virtual ~IMemoryPool() noexcept {};
 
     virtual bool isHugePages(uint32_t node) const       = 0;
     virtual uint8_t *get(size_t size, uint32_t node)    = 0;

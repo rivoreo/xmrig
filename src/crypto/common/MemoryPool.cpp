@@ -51,7 +51,7 @@ xmrig::MemoryPool::MemoryPool(size_t size, bool hugePages, uint32_t node)
 }
 
 
-xmrig::MemoryPool::~MemoryPool()
+xmrig::MemoryPool::~MemoryPool() noexcept
 {
     delete m_memory;
 }

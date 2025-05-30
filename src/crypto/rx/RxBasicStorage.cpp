@@ -131,7 +131,7 @@ xmrig::RxBasicStorage::RxBasicStorage() :
 }
 
 
-xmrig::RxBasicStorage::~RxBasicStorage()
+xmrig::RxBasicStorage::~RxBasicStorage() noexcept
 {
     delete d_ptr;
 }
