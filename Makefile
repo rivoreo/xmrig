@@ -5,11 +5,16 @@ DEFINES += -D HAVE_SYSLOG_H=1 -D NDEBUG=1 -D _GNU_SOURCE=1 -D __STDC_FORMAT_MACR
 DEFINES += -D XMRIG_NO_TLS=1
 DEFINES += -D XMRIG_NO_API=1 -D XMRIG_NO_HTTPD=1
 #DEFINES += -D RAPIDJSON_SSE2=1
+DEFINES += -D NDEBUG=1
 INCLUDE_PATHS += -I src -I src/3rdparty
-CFLAGS += $(DEFINES) $(INCLUDE_PATHS) -Wall -std=gnu99 -O3
-#CXXFLAGS += $(DEFINES) $(INCLUDE_PATHS) -D_GLIBCXX_USE_NANOSLEEP -D_GLIBCXX_USE_SCHED_YIELD -Wall -maes -std=gnu++0x -O3 -DNDEBUG -funroll-loops -fvariable-expansion-in-unroller -fmerge-all-constants -fbranch-target-load-optimize2
-#CXXFLAGS += $(DEFINES) $(INCLUDE_PATHS) -D_GLIBCXX_USE_NANOSLEEP -D_GLIBCXX_USE_SCHED_YIELD -Wall -maes -std=gnu++0x -O3 -DNDEBUG -funroll-loops -fmerge-all-constants
-CXXFLAGS += $(DEFINES) $(INCLUDE_PATHS) -D_GLIBCXX_USE_NANOSLEEP -D_GLIBCXX_USE_SCHED_YIELD -Wall -std=gnu++0x -O3 -DNDEBUG -funroll-loops -fmerge-all-constants
+CFLAGS += $(DEFINES) $(INCLUDE_PATHS) -Wall -std=gnu99
+ifeq ($(filter -O%,$(CFLAGS)),)
+CFLAGS += -O3
+endif
+CXXFLAGS += $(DEFINES) $(INCLUDE_PATHS) -D _GLIBCXX_USE_NANOSLEEP=1 -D _GLIBCXX_USE_SCHED_YIELD=1 -Wall -std=gnu++0x -funroll-loops -fmerge-all-constants
+ifeq ($(filter -O%,$(CXXFLAGS)),)
+CXXFLAGS += -O3
+endif
 #CXXFLAGS += -Dnullptr=__null -Dconstexpr=const -Doverride= -fpermissive
 CXXFLAGS += -D "alignas(b)=__attribute__((__aligned__))"
 LIBS += -l uv -l pthread
