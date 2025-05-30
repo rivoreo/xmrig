@@ -24,7 +24,7 @@
  */
 
 
-#include <assert.h>
+#include <cassert>
 #include <openssl/ssl.h>
 #include <uv.h>
 
@@ -151,11 +151,11 @@ bool xmrig::HttpsClient::verify(X509 *cert)
 
     if (!verifyFingerprint(cert)) {
         if (!m_quiet) {
-            LOG_ERR("[%s:%d] Failed to verify server certificate fingerprint", host().data(), port());
+            XMRIG_LOG_ERR("[%s:%d] Failed to verify server certificate fingerprint", host().data(), port());
 
             if (strlen(m_fingerprint) == 64 && !m_fp.isNull()) {
-                LOG_ERR("\"%s\" was given", m_fingerprint);
-                LOG_ERR("\"%s\" was configured", m_fp.data());
+                XMRIG_LOG_ERR("\"%s\" was given", m_fingerprint);
+                XMRIG_LOG_ERR("\"%s\" was configured", m_fp.data());
             }
         }
 

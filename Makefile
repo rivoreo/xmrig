@@ -45,6 +45,7 @@ SOURCES = \
     src/base/net/stratum/Job.cpp \
     src/base/net/stratum/Pool.cpp \
     src/base/net/stratum/Pools.cpp \
+    src/base/net/stratum/Url.cpp \
     src/base/net/stratum/strategies/FailoverStrategy.cpp \
     src/base/net/stratum/strategies/SinglePoolStrategy.cpp \
     src/base/tools/Arguments.cpp \
@@ -121,6 +122,7 @@ SOURCES += \
     src/crypto/common/Algorithm.cpp \
     src/crypto/common/Coin.cpp \
     src/crypto/common/keccak.cpp \
+    src/crypto/common/MemoryPool.cpp \
     src/crypto/common/Nonce.cpp \
     src/crypto/common/VirtualMemory.cpp
 
@@ -152,16 +154,25 @@ SOURCES += \
 	src/crypto/randomx/vm_interpreted.cpp \
 	src/crypto/rx/Rx.cpp \
 	src/crypto/rx/RxAlgo.cpp \
+	src/crypto/rx/RxBasicStorage.cpp \
 	src/crypto/rx/RxCache.cpp \
 	src/crypto/rx/RxConfig.cpp \
 	src/crypto/rx/RxDataset.cpp \
+	src/crypto/rx/RxQueue.cpp \
 	src/crypto/rx/RxVm.cpp
+ifdef WITH_ASM
 ifeq ($(ARCH),x86)
 SOURCES += \
 	src/crypto/randomx/jit_compiler_x86_static.S \
 	src/crypto/randomx/jit_compiler_x86.cpp
 endif
-endif
+endif	# WITH_ASM
+ifdef WITH_HWLOC
+SOURCES += src/crypto/rx/RxConfig_hwloc.cpp
+else
+SOURCES += src/crypto/rx/RxConfig_basic.cpp
+endif	# WITH_HWLOC
+endif	# WITH_RANDOMX
 
 ifdef WITH_ARGON2
 DEFINES += -D XMRIG_ALGO_ARGON2=1

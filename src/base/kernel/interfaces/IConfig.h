@@ -72,6 +72,7 @@ public:
         ProxyDonateKey       = 1017,
         DaemonKey            = 1018,
         DaemonPollKey        = 1019,
+        SelfSelectKey        = 1028,
 
         // xmrig common
         CPUPriorityKey       = 1021,
@@ -89,6 +90,7 @@ public:
         RandomXInitKey       = 1022,
         RandomXNumaKey       = 1023,
         CPUMaxThreadsKey     = 1026,
+        MemoryPoolKey        = 1027,
 
         // xmrig amd
         OclPlatformKey       = 1400,
@@ -132,6 +134,10 @@ public:
         CudaLaunchKey        = 1204,
         CudaAffinityKey      = 1205,
         CudaMaxUsageKey      = 1206,
+        CudaKey              = 1207,
+        CudaLoaderKey        = 1208,
+        NvmlKey              = 1209,
+        HealthPrintTimeKey   = 1210,
     };
 
     virtual ~IConfig() = default;

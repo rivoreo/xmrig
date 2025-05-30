@@ -111,13 +111,13 @@ public:
             return;
         }
 
-        XMRIG_LOG_INFO("%s" GREEN_BOLD(" READY") " threads %s%zu/%zu (%zu)" CLEAR " huge pages %s%zu/%zu %1.0f%%" CLEAR " memory " CYAN_BOLD("%zu KiB") BLACK_BOLD(" (%" PRIu64 " ms)"),
+        XMRIG_LOG_INFO("%s" GREEN_BOLD(" READY") " threads %s%zu/%zu (%zu)" CLEAR " huge pages %s%1.0f%% %zu/%zu" CLEAR " memory " CYAN_BOLD("%zu KiB") BLACK_BOLD(" (%" PRIu64 " ms)"),
                  tag,
                  m_errors == 0 ? CYAN_BOLD_S : YELLOW_BOLD_S,
                  m_started, m_threads, m_ways,
                  (m_hugePages == m_pages ? GREEN_BOLD_S : (m_hugePages == 0 ? RED_BOLD_S : YELLOW_BOLD_S)),
-                 m_hugePages, m_pages,
                  m_hugePages == 0 ? 0.0 : static_cast<double>(m_hugePages) / m_pages * 100.0,
+                 m_hugePages, m_pages,
                  memory() / 1024,
                  Chrono::steadyMSecs() - m_ts
                  );
@@ -146,10 +146,11 @@ public:
 
     inline void start()
     {
-        XMRIG_LOG_INFO("%s use profile " BLUE_BG(WHITE_BOLD_S " %s ") WHITE_BOLD_S " (" CYAN_BOLD("%zu") WHITE_BOLD(" threads)") " scratchpad " CYAN_BOLD("%zu KiB"),
+        XMRIG_LOG_INFO("%s use profile " BLUE_BG(WHITE_BOLD_S " %s ") WHITE_BOLD_S " (" CYAN_BOLD("%zu") WHITE_BOLD(" thread%s)") " scratchpad " CYAN_BOLD("%zu KiB"),
                  tag,
                  profileName.data(),
                  threads.size(),
+                 threads.size() > 1 ? "s" : "",
                  algo.l3() / 1024
                  );
 
@@ -208,6 +209,24 @@ public:
 
 
 } // namespace xmrig
+
+
+const char *xmrig::backend_tag(uint32_t backend)
+{
+#   ifdef XMRIG_FEATURE_OPENCL
+    if (backend == Nonce::OPENCL) {
+        return ocl_tag();
+    }
+#   endif
+
+#   ifdef XMRIG_FEATURE_CUDA
+    if (backend == Nonce::CUDA) {
+        return cuda_tag();
+    }
+#   endif
+
+    return tag;
+}
 
 
 const char *xmrig::cpu_tag()

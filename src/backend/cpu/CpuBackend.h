@@ -50,6 +50,8 @@ public:
     ~CpuBackend() noexcept override;
 
 protected:
+    inline void execCommand(char) override {}
+
     bool isEnabled() const override;
     bool isEnabled(const Algorithm &algorithm) const override;
     const Hashrate *hashrate() const override;

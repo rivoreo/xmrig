@@ -56,6 +56,7 @@ static const option options[] = {
     { "http-no-restricted",    0, nullptr, IConfig::HttpRestrictedKey     },
     { "daemon",                0, nullptr, IConfig::DaemonKey             },
     { "daemon-poll-interval",  1, nullptr, IConfig::DaemonPollKey         },
+    { "self-select",           1, nullptr, IConfig::SelfSelectKey         },
 #   endif
     { "av",                    1, nullptr, IConfig::AVKey                 },
     { "background",            0, nullptr, IConfig::BackgroundKey         },
@@ -84,6 +85,7 @@ static const option options[] = {
     { "no-cpu",                0, nullptr, IConfig::CPUKey                },
     { "max-cpu-usage",         1, nullptr, IConfig::CPUMaxThreadsKey      },
     { "cpu-max-threads-hint",  1, nullptr, IConfig::CPUMaxThreadsKey      },
+    { "cpu-memory-pool",       1, nullptr, IConfig::MemoryPoolKey         },
 #   ifdef XMRIG_FEATURE_TLS
     { "tls",                   0, nullptr, IConfig::TlsKey                },
     { "tls-fingerprint",       1, nullptr, IConfig::FingerprintKey        },
@@ -101,6 +103,15 @@ static const option options[] = {
     { "opencl-platform",       1, nullptr, IConfig::OclPlatformKey        },
     { "opencl-loader",         1, nullptr, IConfig::OclLoaderKey          },
     { "opencl-no-cache",       0, nullptr, IConfig::OclCacheKey           },
+#   endif
+#   ifdef XMRIG_FEATURE_CUDA
+    { "cuda",                  0, nullptr, IConfig::CudaKey               },
+    { "cuda-loader",           1, nullptr, IConfig::CudaLoaderKey         },
+    { "cuda-devices",          1, nullptr, IConfig::CudaDevicesKey        },
+#   endif
+#   ifdef XMRIG_FEATURE_NVML
+    { "no-nvml",               0, nullptr, IConfig::NvmlKey               },
+    { "health-print-time",     1, nullptr, IConfig::HealthPrintTimeKey    },
 #   endif
     { nullptr,                 0, nullptr, 0 }
 };

@@ -26,11 +26,12 @@
 #define XMRIG_CONFIG_H
 
 
-#include <stdint.h>
+#include <cstdint>
 
 
 #include "backend/cpu/CpuConfig.h"
 #include "base/kernel/config/BaseConfig.h"
+#include "base/tools/Object.h"
 #include "rapidjson/fwd.h"
 
 
@@ -38,14 +39,17 @@ namespace xmrig {
 
 
 class ConfigPrivate;
+class CudaConfig;
 class IThread;
-class RxConfig;
 class OclConfig;
+class RxConfig;
 
 
 class Config : public BaseConfig
 {
 public:
+    XMRIG_DISABLE_COPY_MOVE(Config);
+
     Config();
     ~Config() noexcept override;
 
@@ -55,8 +59,16 @@ public:
     const OclConfig &cl() const;
 #   endif
 
+#   ifdef XMRIG_FEATURE_CUDA
+    const CudaConfig &cuda() const;
+#   endif
+
 #   ifdef XMRIG_ALGO_RANDOMX
     const RxConfig &rx() const;
+#   endif
+
+#   if defined(XMRIG_FEATURE_NVML)
+    uint32_t healthPrintTime() const;
 #   endif
 
     bool isShouldSave() const;

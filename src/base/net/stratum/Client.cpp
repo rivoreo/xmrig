@@ -6,6 +6,7 @@
  * Copyright 2016      Jay D Dee   <jayddee246@gmail.com>
  * Copyright 2017-2018 XMR-Stak    <https://github.com/fireice-uk>, <https://github.com/psychocrypt>
  * Copyright 2018-2019 SChernykh   <https://github.com/SChernykh>
+ * Copyright 2019      jtgrassie   <https://github.com/jtgrassie>
  * Copyright 2016-2019 XMRig       <https://github.com/xmrig>, <support@xmrig.com>
  *
  *   This program is free software: you can redistribute it and/or modify
@@ -22,11 +23,11 @@
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <assert.h>
-#include <inttypes.h>
+#include <cassert>
+#include <cinttypes>
 #include <iterator>
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <utility>
 
 
@@ -136,6 +137,41 @@ const char *xmrig::Client::tlsVersion() const
 }
 
 
+int64_t xmrig::Client::send(const rapidjson::Value &obj, Callback callback)
+{
+    assert(obj["id"] == sequence());
+
+    m_callbacks.insert({ sequence(), std::move(callback) });
+
+    return send(obj);
+}
+
+
+int64_t xmrig::Client::send(const rapidjson::Value &obj)
+{
+    using namespace rapidjson;
+
+    Value value;
+
+    StringBuffer buffer(nullptr, 512);
+    Writer<StringBuffer> writer(buffer);
+    obj.Accept(writer);
+
+    const size_t size = buffer.GetSize();
+    if (size > (sizeof(m_sendBuf) - 2)) {
+        XMRIG_LOG_ERR("[%s] send failed: \"send buffer overflow: %zu > %zu\"", url(), size, (sizeof(m_sendBuf) - 2));
+        close();
+        return -1;
+    }
+
+    memcpy(m_sendBuf, buffer.GetString(), size);
+    m_sendBuf[size]     = '\n';
+    m_sendBuf[size + 1] = '\0';
+
+    return send(size + 1);
+}
+
+
 int64_t xmrig::Client::submit(const JobResult &result)
 {
 #   ifndef XMRIG_PROXY_PROJECT
@@ -176,9 +212,9 @@ int64_t xmrig::Client::submit(const JobResult &result)
     JsonRequest::create(doc, m_sequence, "submit", params);
 
 #   ifdef XMRIG_PROXY_PROJECT
-    m_results[m_sequence] = SubmitResult(m_sequence, result.diff, result.actualDiff(), result.id);
+    m_results[m_sequence] = SubmitResult(m_sequence, result.diff, result.actualDiff(), result.id, 0);
 #   else
-    m_results[m_sequence] = SubmitResult(m_sequence, result.diff, result.actualDiff());
+    m_results[m_sequence] = SubmitResult(m_sequence, result.diff, result.actualDiff(), 0, result.backend);
 #   endif
 
     return send(doc);
@@ -222,7 +258,7 @@ void xmrig::Client::tick(uint64_t now)
 {
     if (m_state == ConnectedState) {
         if (m_expire && now > m_expire) {
-            LOG_DEBUG_ERR("[%s] timeout", url());
+            XMRIG_LOG_DEBUG_ERR("[%s] timeout", url());
             close();
         }
         else if (m_keepAlive && now > m_keepAlive) {
@@ -321,9 +357,23 @@ bool xmrig::Client::parseJob(const rapidjson::Value &params, int *code)
         return false;
     }
 
-    if (!job.setBlob(params["blob"].GetString())) {
-        *code = 4;
-        return false;
+#   ifdef XMRIG_FEATURE_HTTP
+    if (m_pool.mode() == Pool::MODE_SELF_SELECT) {
+        job.setExtraNonce(Json::getString(params, "extra_nonce"));
+        job.setPoolWallet(Json::getString(params, "pool_wallet"));
+
+        if (job.extraNonce().isNull() || job.poolWallet().isNull()) {
+            *code = 4;
+            return false;
+        }
+    }
+    else
+#   endif
+    {
+        if (!job.setBlob(params["blob"].GetString())) {
+            *code = 4;
+            return false;
+        }
     }
 
     if (!job.setTarget(params["target"].GetString())) {
@@ -346,7 +396,7 @@ bool xmrig::Client::parseJob(const rapidjson::Value &params, int *code)
         return false;
     }
 
-    if (job.algorithm().family() == Algorithm::RANDOM_X && !job.setSeedHash(Json::getString(params, "seed_hash"))) {
+    if (m_pool.mode() != Pool::MODE_SELF_SELECT && job.algorithm().family() == Algorithm::RANDOM_X && !job.setSeedHash(Json::getString(params, "seed_hash"))) {
         if (!isQuiet()) {
             XMRIG_LOG_ERR("[%s] failed to parse field \"seed_hash\" required by RandomX", url(), algo);
         }
@@ -414,7 +464,7 @@ bool xmrig::Client::send(BIO *bio)
         }
     }
     else {
-        LOG_DEBUG_ERR("[%s] send failed, invalid state: %d", url(), m_state);
+        XMRIG_LOG_DEBUG_ERR("[%s] send failed, invalid state: %d", url(), m_state);
     }
 
     (void) BIO_reset(bio);
@@ -474,29 +524,6 @@ int xmrig::Client::resolve(const String &host)
 }
 
 
-int64_t xmrig::Client::send(const rapidjson::Document &doc)
-{
-    using namespace rapidjson;
-
-    StringBuffer buffer(nullptr, 512);
-    Writer<StringBuffer> writer(buffer);
-    doc.Accept(writer);
-
-    const size_t size = buffer.GetSize();
-    if (size > (sizeof(m_sendBuf) - 2)) {
-        XMRIG_LOG_ERR("[%s] send failed: \"send buffer overflow: %zu > %zu\"", url(), size, (sizeof(m_sendBuf) - 2));
-        close();
-        return -1;
-    }
-
-    memcpy(m_sendBuf, buffer.GetString(), size);
-    m_sendBuf[size]     = '\n';
-    m_sendBuf[size + 1] = '\0';
-
-    return send(size + 1);
-}
-
-
 int64_t xmrig::Client::send(size_t size)
 {
     XMRIG_LOG_DEBUG("[%s] send (%d bytes): \"%.*s\"", url(), size, static_cast<int>(size) - 1, m_sendBuf);
@@ -511,7 +538,7 @@ int64_t xmrig::Client::send(size_t size)
 #   endif
     {
         if (state() != ConnectedState || !uv_is_writable(m_stream)) {
-            LOG_DEBUG_ERR("[%s] send failed, invalid state: %d", url(), m_state);
+            XMRIG_LOG_DEBUG_ERR("[%s] send failed, invalid state: %d", url(), m_state);
             return -1;
         }
 
@@ -720,6 +747,10 @@ void xmrig::Client::parseNotification(const char *method, const rapidjson::Value
 
 void xmrig::Client::parseResponse(int64_t id, const rapidjson::Value &result, const rapidjson::Value &error)
 {
+    if (handleResponse(id, result, error)) {
+        return;
+    }
+
     if (error.IsObject()) {
         const char *message = error["message"].GetString();
 
@@ -909,12 +940,17 @@ void xmrig::Client::onConnect(uv_connect_t *req, int status)
             XMRIG_LOG_ERR("[%s] connect error: \"%s\"", client->url(), uv_strerror(status));
         }
 
-		if(client->state() == ClosingState) return;
-		if(client->state() != ConnectingState) {
-			XMRIG_LOG_ERR("[%s] connect error: \"invalid state: %d\"", client->url(), client->state());
-			client->disconnect();
-			return;
-		}
+        if (client->state() == ReconnectingState) {
+            return;
+        }
+
+        if (client->state() != ConnectingState) {
+            if (!client->isQuiet()) {
+                XMRIG_LOG_ERR("[%s] connect error: \"invalid state: %d\"", client->url(), client->state());
+            }
+
+            return;
+        }
 
         delete req;
         client->close();

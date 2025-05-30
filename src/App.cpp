@@ -35,7 +35,6 @@
 #include "core/config/Config.h"
 #include "core/Controller.h"
 #include "core/Miner.h"
-#include "crypto/common/VirtualMemory.h"
 #include "net/Network.h"
 #include "Summary.h"
 #include "version.h"
@@ -73,8 +72,6 @@ int xmrig::App::exec()
     if (rc != 0) {
         return rc;
     }
-
-    VirtualMemory::init(m_controller->config()->cpu().isHugePages());
 
     Summary::print(m_controller);
 

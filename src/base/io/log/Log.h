@@ -82,6 +82,7 @@ private:
 #define WHITE_S             CSI "0;37m" // another name for LT.GRAY
 #define WHITE_BOLD_S        CSI "1;37m" // actually white
 
+#define GREEN_BG_BOLD_S     CSI "42;1m"
 #define BLUE_BG_S           CSI "44m"
 #define BLUE_BG_BOLD_S      CSI "44;1m"
 #define MAGENTA_BG_S        CSI "45m"
@@ -107,6 +108,7 @@ private:
 #define WHITE(x)            WHITE_S x CLEAR
 #define WHITE_BOLD(x)       WHITE_BOLD_S x CLEAR
 
+#define GREEN_BG_BOLD(x)    GREEN_BG_BOLD_S x CLEAR
 #define BLUE_BG(x)          BLUE_BG_S x CLEAR
 #define BLUE_BG_BOLD(x)     BLUE_BG_BOLD_S x CLEAR
 #define MAGENTA_BG(x)       MAGENTA_BG_S x CLEAR
@@ -130,11 +132,11 @@ private:
 #endif
 
 #if defined(APP_DEBUG) || defined(APP_DEVEL)
-#   define LOG_DEBUG_ERR(x, ...)  xmrig::Log::print(xmrig::Log::ERR,     x, ##__VA_ARGS__)
-#   define LOG_DEBUG_WARN(x, ...) xmrig::Log::print(xmrig::Log::WARNING, x, ##__VA_ARGS__)
+#   define XMRIG_LOG_DEBUG_ERR(x, ...)  xmrig::Log::print(xmrig::Log::ERR,     x, ##__VA_ARGS__)
+#   define XMRIG_LOG_DEBUG_WARN(x, ...) xmrig::Log::print(xmrig::Log::WARNING, x, ##__VA_ARGS__)
 #else
-#   define LOG_DEBUG_ERR(x, ...)
-#   define LOG_DEBUG_WARN(x, ...)
+#   define XMRIG_LOG_DEBUG_ERR(x, ...)
+#   define XMRIG_LOG_DEBUG_WARN(x, ...)
 #endif
 
 

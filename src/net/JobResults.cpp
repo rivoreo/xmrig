@@ -96,7 +96,7 @@ static inline void checkHash(const JobBundle &bundle, std::vector<JobResult> &re
         results.emplace_back(bundle.job, nonce, hash);
     }
     else {
-        LOG_ERR("COMPUTE ERROR"); // TODO Extend information.
+        XMRIG_LOG_ERR("COMPUTE ERROR"); // TODO Extend information.
         errors++;
     }
 }
@@ -105,7 +105,7 @@ static inline void checkHash(const JobBundle &bundle, std::vector<JobResult> &re
 static void getResults(JobBundle &bundle, std::vector<JobResult> &results, uint32_t &errors, bool hwAES)
 {
     const auto &algorithm = bundle.job.algorithm();
-    auto memory           = new VirtualMemory(algorithm.l3(), false);
+    auto memory           = new VirtualMemory(algorithm.l3(), false, false);
     uint8_t hash[32]{ 0 };
 
     if (algorithm.family() == Algorithm::RANDOM_X) {

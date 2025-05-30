@@ -46,6 +46,7 @@ static inline const std::string &usage()
     u += "Usage: " APP_ID " [OPTIONS]\n\nNetwork:\n";
     u += "  -o, --url=URL                 URL of mining server\n";
     u += "  -a, --algo=ALGO               mining algorithm https://xmrig.com/docs/algorithms\n";
+    u += "      --coin=COIN               specify coin instead of algorithm\n";
     u += "  -u, --user=USERNAME           username for mining server\n";
     u += "  -p, --pass=PASSWORD           password for mining server\n";
     u += "  -O, --userpass=U:P            username:password pair for mining server\n";
@@ -61,6 +62,7 @@ static inline const std::string &usage()
 #   ifdef XMRIG_FEATURE_HTTP
     u += "      --daemon                  use daemon RPC instead of pool for solo mining\n";
     u += "      --daemon-poll-interval=N  daemon poll interval in milliseconds (default: 1000)\n";
+    u += "      --self-select=URL         self-select block templates from URL\n";
 #   endif
 
     u += "  -r, --retries=N               number of times to retry before switch to backup server (default: 5)\n";
@@ -77,6 +79,7 @@ static inline const std::string &usage()
     u += "      --cpu-affinity            set process affinity to CPU core(s), mask 0x3 for cores 0 and 1\n";
     u += "      --cpu-priority            set process priority (0 idle, 2 normal to 5 highest)\n";
     u += "      --cpu-max-threads-hint=N  maximum CPU threads count (in percentage) hint for autoconfig\n";
+    u += "      --cpu-memory-pool=N       number of 2 MB pages for persistent memory pool, -1 (auto), 0 (disable)\n";
     u += "      --no-huge-pages           disable huge pages support\n";
     u += "      --asm=ASM                 ASM optimizations, possible values: auto, none, intel, ryzen, bulldozer\n";
 
@@ -98,11 +101,21 @@ static inline const std::string &usage()
 #   ifdef XMRIG_FEATURE_OPENCL
     u += "\nOpenCL backend:\n";
     u += "      --opencl                  enable OpenCL mining backend\n";
-    u += "      --opencl-devices=N        list of OpenCL devices to use\n";
+    u += "      --opencl-devices=N        comma separated list of OpenCL devices to use\n";
     u += "      --opencl-platform=N       OpenCL platform index or name\n";
-    u += "      --opencl-loader=N         path to OpenCL-ICD-Loader (OpenCL.dll or libOpenCL.so)\n";
+    u += "      --opencl-loader=PATH      path to OpenCL-ICD-Loader (OpenCL.dll or libOpenCL.so)\n";
     u += "      --opencl-no-cache         disable OpenCL cache\n";
     u += "      --print-platforms         print available OpenCL platforms and exit\n";
+#   endif
+
+#   ifdef XMRIG_FEATURE_CUDA
+    u += "\nCUDA backend:\n";
+    u += "      --cuda                    enable CUDA mining backend\n";
+    u += "      --cuda-loader=PATH        path to CUDA plugin (xmrig-cuda.dll or libxmrig-cuda.so)\n";
+    u += "      --cuda-devices=N          comma separated list of CUDA devices to use\n";
+#   endif
+#   ifdef XMRIG_FEATURE_NVML
+    u += "      --no-nvml                 disable NVML (NVIDIA Management Library) support\n";
 #   endif
 
     u += "\nLogging:\n";
@@ -113,6 +126,9 @@ static inline const std::string &usage()
 
     u += "  -l, --log-file=FILE           log all output to a file\n";
     u += "      --print-time=N            print hashrate report every N seconds\n";
+#   ifdef XMRIG_FEATURE_NVML
+    u += "      --health-print-time=N     print health report every N seconds\n";
+#   endif
     u += "      --no-color                disable colored output\n";
 
     u += "\nMisc:\n";

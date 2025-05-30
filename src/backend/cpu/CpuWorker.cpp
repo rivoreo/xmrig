@@ -62,19 +62,19 @@ xmrig::CpuWorker<N>::CpuWorker(size_t id, const CpuLaunchData &data) :
     m_miner(data.miner),
     m_ctx()
 {
-    m_memory = new VirtualMemory(m_algorithm.l3() * N, data.hugePages);
+    m_memory = new VirtualMemory(m_algorithm.l3() * N, data.hugePages, true, m_node);
 }
 
 
 template<size_t N>
 xmrig::CpuWorker<N>::~CpuWorker() noexcept
 {
-    CnCtx::release(m_ctx, N);
-    delete m_memory;
-
 #   ifdef XMRIG_ALGO_RANDOMX
     delete m_vm;
 #   endif
+
+    CnCtx::release(m_ctx, N);
+    delete m_memory;
 }
 
 
@@ -303,7 +303,7 @@ void xmrig::CpuWorker<N>::consumeJob()
         return;
     }
 
-    m_job.add(m_miner->job(), Nonce::sequence(Nonce::CPU), kReserveCount);
+    m_job.add(m_miner->job(), kReserveCount, Nonce::CPU);
 
 #   ifdef XMRIG_ALGO_RANDOMX
     if (m_job.currentJob().algorithm().family() == Algorithm::RANDOM_X) {

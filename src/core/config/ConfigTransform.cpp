@@ -47,6 +47,10 @@ static const char *kRandomX     = "randomx";
 static const char *kOcl         = "opencl";
 #endif
 
+#ifdef XMRIG_FEATURE_CUDA
+static const char *kCuda        = "cuda";
+#endif
+
 
 static inline uint64_t intensity(uint64_t av)
 {
@@ -141,6 +145,10 @@ void xmrig::ConfigTransform::transform(rapidjson::Document &doc, int key, const 
     case IConfig::CPUMaxThreadsKey: /* --cpu-max-threads-hint */
         return set(doc, kCpu, "max-threads-hint", static_cast<uint64_t>(strtol(arg, nullptr, 10)));
 
+    case IConfig::MemoryPoolKey: /* --cpu-memory-pool */
+        return set(doc, kCpu, "memory-pool", static_cast<int64_t>(strtol(arg, nullptr, 10)));
+        break;
+
 #   ifdef XMRIG_FEATURE_ASM
     case IConfig::AssemblyKey: /* --asm */
         return set(doc, kCpu, "asm", arg);
@@ -175,6 +183,26 @@ void xmrig::ConfigTransform::transform(rapidjson::Document &doc, int key, const 
         }
 
         return set(doc, kOcl, "platform", arg);
+#   endif
+
+#   ifdef XMRIG_FEATURE_CUDA
+    case IConfig::CudaKey: /* --cuda */
+        return set(doc, kCuda, kEnabled, true);
+
+    case IConfig::CudaLoaderKey: /* --cuda-loader */
+        return set(doc, kCuda, "loader", arg);
+
+    case IConfig::CudaDevicesKey: /* --cuda-devices */
+        set(doc, kCuda, kEnabled, true);
+        return set(doc, kCuda, "devices-hint", arg);
+#   endif
+
+#   ifdef XMRIG_FEATURE_NVML
+    case IConfig::NvmlKey: /* --no-nvml */
+        return set(doc, kCuda, "nvml", false);
+
+    case IConfig::HealthPrintTimeKey: /* --health-print-time */
+        return set(doc, "health-print-time", static_cast<uint64_t>(strtol(arg, nullptr, 10)));
 #   endif
 
     default:

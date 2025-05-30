@@ -1,3 +1,33 @@
+# v4.6.2-beta
+- [#1274](https://github.com/xmrig/xmrig/issues/1274) Added `--cuda-devices` command line option.
+- [#1277](https://github.com/xmrig/xmrig/pull/1277) Fixed function names for clang on Apple.
+
+# v4.6.1-beta
+- [#1272](https://github.com/xmrig/xmrig/pull/1272) Optimized hashrate calculation.
+- [#1273](https://github.com/xmrig/xmrig/issues/1273) Fixed crash when use `GET /2/backends` API endpoint with disabled CUDA.
+
+# v4.6.0-beta
+- [#1263](https://github.com/xmrig/xmrig/pull/1263) Added new option `dataset_host` for NVIDIA GPUs with less than 4 GB memory (RandomX only).
+
+# v4.5.0-beta
+- Added NVIDIA CUDA support via external [CUDA plugun](https://github.com/xmrig/xmrig-cuda). XMRig now is unified 3 in 1 miner.
+
+# v4.4.0-beta
+- [#1068](https://github.com/xmrig/xmrig/pull/1068) Added support for `self-select` stratum protocol extension.
+- [#1240](https://github.com/xmrig/xmrig/pull/1240) Sync with the latest RandomX code.
+- [#1241](https://github.com/xmrig/xmrig/issues/1241) Fixed regression with colors on old Windows systems.
+- [#1243](https://github.com/xmrig/xmrig/pull/1243) Fixed incorrect OpenCL memory size detection in some cases.
+- [#1247](https://github.com/xmrig/xmrig/pull/1247) Fixed ARM64 RandomX code alignment.
+- [#1248](https://github.com/xmrig/xmrig/pull/1248) Fixed RandomX code cache cleanup on iOS/Darwin.
+
+# v4.3.1-beta
+- Fixed regression in v4.3.0, miner didn't create `cn` mining profile with default config example.
+
+# v4.3.0-beta
+- [#1227](https://github.com/xmrig/xmrig/pull/1227) Added new algorithm `rx/arq`, RandomX variant for upcoming ArQmA fork.
+- [#808](https://github.com/xmrig/xmrig/issues/808#issuecomment-539297156) Added experimental support for persistent memory for CPU mining threads.
+- [#1221](https://github.com/xmrig/xmrig/issues/1221) Improved RandomX dataset memory usage and initialization speed for NUMA machines.
+
 # v4.2.1-beta
 - [#1150](https://github.com/xmrig/xmrig/issues/1150) Fixed build on FreeBSD.
 - [#1175](https://github.com/xmrig/xmrig/issues/1175) Fixed support for systems where total count of NUMA nodes not equal usable nodes count.

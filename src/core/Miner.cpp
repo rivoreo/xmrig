@@ -56,6 +56,11 @@
 #endif
 
 
+#ifdef XMRIG_FEATURE_CUDA
+#   include "backend/cuda/CudaBackend.h"
+#endif
+
+
 #ifdef XMRIG_ALGO_RANDOMX
 #   include "crypto/rx/RxConfig.h"
 #endif
@@ -72,12 +77,8 @@ class MinerPrivate
 public:
     XMRIG_DISABLE_COPY_MOVE_DEFAULT(MinerPrivate)
 
-    inline MinerPrivate(Controller *controller) : controller(controller)
-    {
-#       ifdef XMRIG_ALGO_RANDOMX
-        Rx::init();
-#       endif
-    }
+
+    inline MinerPrivate(Controller *controller) : controller(controller) {}
 
 
     inline ~MinerPrivate()
@@ -156,6 +157,7 @@ public:
         reply.AddMember("ua",           StringRef(Platform::userAgent()), allocator);
         reply.AddMember("cpu",          Cpu::toJSON(doc), allocator);
         reply.AddMember("donate_level", controller->config()->pools().donateLevel(), allocator);
+        reply.AddMember("paused",       !enabled, allocator);
 
         Value algo(kArrayType);
 
@@ -232,9 +234,9 @@ public:
 
 
 #   ifdef XMRIG_ALGO_RANDOMX
-    bool initRX(IRxListener *listener)
+    inline bool initRX()
     {
-        return Rx::init(job, controller->config()->rx().threads(), controller->config()->cpu().isHugePages(), controller->config()->rx().isNUMA(), listener);
+        return Rx::init(job, controller->config()->rx(), controller->config()->cpu().isHugePages());
     }
 #   endif
 
@@ -261,6 +263,10 @@ public:
 xmrig::Miner::Miner(Controller *controller)
     : d_ptr(new MinerPrivate(controller))
 {
+#   ifdef XMRIG_ALGO_RANDOMX
+    Rx::init(this);
+#   endif
+
     controller->addListener(this);
 
 #   ifdef XMRIG_FEATURE_API
@@ -269,10 +275,15 @@ xmrig::Miner::Miner(Controller *controller)
 
     d_ptr->timer = new Timer(this);
 
+    d_ptr->backends.reserve(3);
     d_ptr->backends.push_back(new CpuBackend(controller));
 
 #   ifdef XMRIG_FEATURE_OPENCL
     d_ptr->backends.push_back(new OclBackend(controller));
+#   endif
+
+#   ifdef XMRIG_FEATURE_CUDA
+    d_ptr->backends.push_back(new CudaBackend(controller));
 #   endif
 
     d_ptr->rebuild();
@@ -314,6 +325,34 @@ xmrig::Job xmrig::Miner::job() const
     std::lock_guard<std::mutex> lock(mutex);
 
     return d_ptr->job;
+}
+
+
+void xmrig::Miner::execCommand(char command)
+{
+    switch (command) {
+    case 'h':
+    case 'H':
+        printHashrate(true);
+        break;
+
+    case 'p':
+    case 'P':
+        setEnabled(false);
+        break;
+
+    case 'r':
+    case 'R':
+        setEnabled(true);
+        break;
+
+    default:
+        break;
+    }
+
+    for (auto backend : d_ptr->backends) {
+        backend->execCommand(command);
+    }
 }
 
 
@@ -382,7 +421,7 @@ void xmrig::Miner::setJob(const Job &job, bool donate)
     }
 
 #   ifdef XMRIG_ALGO_RANDOMX
-    if (d_ptr->algorithm.family() == Algorithm::RANDOM_X && job.algorithm().family() == Algorithm::RANDOM_X && !Rx::isReady(job)) {
+    if (job.algorithm().family() == Algorithm::RANDOM_X && !Rx::isReady(job)) {
         stop();
     }
 #   endif
@@ -402,7 +441,7 @@ void xmrig::Miner::setJob(const Job &job, bool donate)
     }
 
 #   ifdef XMRIG_ALGO_RANDOMX
-    const bool ready = d_ptr->initRX(this);
+    const bool ready = d_ptr->initRX();
 #   else
     constexpr const bool ready = true;
 #   endif
@@ -455,7 +494,8 @@ void xmrig::Miner::onTimer(const Timer *)
 
     d_ptr->maxHashrate[d_ptr->algorithm] = std::max(d_ptr->maxHashrate[d_ptr->algorithm], maxHashrate);
 
-    if ((d_ptr->ticks % (d_ptr->controller->config()->printTime() * 2)) == 0) {
+    auto seconds = d_ptr->controller->config()->printTime();
+    if (seconds && (d_ptr->ticks % (seconds * 2)) == 0) {
         printHashrate(false);
     }
 
