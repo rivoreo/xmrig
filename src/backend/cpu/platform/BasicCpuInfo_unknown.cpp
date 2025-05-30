@@ -22,6 +22,11 @@
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <sys/param.h>
+#ifdef BSD
+#include <sys/sysctl.h>
+#include <errno.h>
+#endif
 #include "backend/cpu/platform/BasicCpuInfo.h"
 #include <thread>
 #include <string.h>
@@ -31,6 +36,11 @@ xmrig::BasicCpuInfo::BasicCpuInfo() :
     m_threads(std::thread::hardware_concurrency()),
     m_aes(false),
     m_avx2(false) {
+#ifdef BSD
+	int mib[] = { CTL_HW, HW_MODEL };
+	size_t model_len = sizeof m_brand;
+	if(sysctl(mib, 2, m_brand, &model_len, NULL, 0) < 0 && errno != ENOMEM)
+#endif
 	memcpy(m_brand, "Unknown", 7);
 }
 
