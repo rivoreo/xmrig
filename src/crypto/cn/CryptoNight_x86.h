@@ -689,7 +689,7 @@ inline void cryptonight_single_hash(const uint8_t *__restrict__ input, size_t si
         bx0 = cx;
     }
 
-#   ifdef XMRIG_FEATURE_ASM
+#   ifdef XMRIG_FEATURE_CRYPTONIGHT_ASM
     }
 #   endif
 
@@ -769,7 +769,7 @@ inline void cryptonight_single_hash_gpu(const uint8_t *__restrict__ input, size_
 #endif
 
 
-#ifdef XMRIG_FEATURE_ASM
+#ifdef XMRIG_FEATURE_CRYPTONIGHT_ASM
 extern "C" void cnv2_mainloop_ivybridge_asm(cryptonight_ctx **ctx);
 extern "C" void cnv2_mainloop_ryzen_asm(cryptonight_ctx **ctx);
 extern "C" void cnv2_mainloop_bulldozer_asm(cryptonight_ctx **ctx);

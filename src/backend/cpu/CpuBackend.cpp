@@ -406,7 +406,7 @@ rapidjson::Value xmrig::CpuBackend::toJSON(rapidjson::Document &doc) const
     out.AddMember("hw-aes",     cpu.isHwAES(), allocator);
     out.AddMember("priority",   cpu.priority(), allocator);
 
-#   ifdef XMRIG_FEATURE_ASM
+#   ifdef XMRIG_FEATURE_CRYPTONIGHT_ASM
     const Assembly assembly = Cpu::assembly(cpu.assembly());
     out.AddMember("asm", assembly.toJSON(), allocator);
 #   else

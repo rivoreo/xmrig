@@ -255,7 +255,7 @@ xmrig::CnHash::CnHash()
     m_map[Algorithm::AR2_WRKZ][AV_SINGLE_SOFT][Assembly::NONE]   = argon2::single_hash<Algorithm::AR2_WRKZ>;
 #   endif
 
-#   ifdef XMRIG_FEATURE_ASM
+#   ifdef XMRIG_FEATURE_CRYPTONIGHT_ASM
     patchAsmVariants();
 #   endif
 }
@@ -267,7 +267,7 @@ xmrig::cn_hash_fun xmrig::CnHash::fn(const Algorithm &algorithm, AlgoVariant av,
         return nullptr;
     }
 
-#   ifdef XMRIG_FEATURE_ASM
+#   ifdef XMRIG_FEATURE_CRYPTONIGHT_ASM
     cn_hash_fun fun = cnHash.m_map[algorithm][av][Cpu::assembly(assembly)];
     if (fun) {
         return fun;
