@@ -31,6 +31,15 @@
 #include <thread>
 #include <string.h>
 
+#if defined __arm__ || defined __ARMEL__ || defined __arm64__ || defined __aarch64__ || defined __AARCH64EL__
+#define XMRIG_ARM
+#endif
+
+#if defined XMRIG_ARM && __ARM_FEATURE_CRYPTO && !defined(__APPLE__)
+#   include <sys/auxv.h>
+#   include <asm/hwcap.h>
+#endif
+
 xmrig::BasicCpuInfo::BasicCpuInfo() :
     m_brand(),
     m_threads(std::thread::hardware_concurrency()),
@@ -39,14 +48,33 @@ xmrig::BasicCpuInfo::BasicCpuInfo() :
 #ifdef BSD
 	int mib[] = { CTL_HW, HW_MODEL };
 	size_t model_len = sizeof m_brand;
-	if(sysctl(mib, 2, m_brand, &model_len, NULL, 0) < 0 && errno != ENOMEM)
+	if(sysctl(mib, 2, m_brand, &model_len, NULL, 0) < 0 && errno != ENOMEM) *m_brand = 0;
 #endif
-	memcpy(m_brand, "Unknown", 7);
+
+	if(!*m_brand) {
+#ifdef XMRIG_ARM
+#if defined __aarch64__ || defined __AARCH64EL__
+		memcpy(m_brand, "Unknown AArch64 processor", 23);
+#else
+		memcpy(m_brand, "Unknown ARM processor", 21);
+#endif
+#else
+		memcpy(m_brand, "Unknown", 7);
+#endif
+	}
+
+#if defined XMRIG_ARM && __ARM_FEATURE_CRYPTO && 0
+# if !defined(__APPLE__)
+    m_aes = getauxval(AT_HWCAP) & HWCAP_AES;
+# else
+    m_aes = true;
+# endif
+#endif
 }
 
 
 const char *xmrig::BasicCpuInfo::backend() const {
-	return "basic_unknown";
+	return "basic_generic";
 }
 
 
