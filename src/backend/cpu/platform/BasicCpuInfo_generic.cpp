@@ -117,7 +117,8 @@ xmrig::BasicCpuInfo::BasicCpuInfo() :
 		if(len) value1.copy(m_brand, sizeof m_brand - 1);
 		if(!value2.empty() && len < sizeof m_brand - 1) {
 			if(len) m_brand[len] = ' ';
-			value2.copy(m_brand + len + 1, sizeof m_brand - 1 - len - 1);
+			int offset = len ? len + 1 : 0;
+			value2.copy(m_brand + offset, sizeof m_brand - 1 - offset);
 		}
 #endif
 	}
