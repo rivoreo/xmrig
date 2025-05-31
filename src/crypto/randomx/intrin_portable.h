@@ -93,6 +93,7 @@ void rx_set_double_precision();
 #ifdef __SSE2__
 #ifdef __GNUC__
 #include <x86intrin.h>
+#include <mm_malloc.h>
 #else
 #include <intrin.h>
 #endif
