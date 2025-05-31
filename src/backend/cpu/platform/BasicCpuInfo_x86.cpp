@@ -175,7 +175,7 @@ xmrig::BasicCpuInfo::BasicCpuInfo() :
 
 const char *xmrig::BasicCpuInfo::backend() const
 {
-    return "basic";
+    return "basic_x86";
 }
 
 
