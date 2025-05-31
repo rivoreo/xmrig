@@ -26,6 +26,9 @@
 #ifdef BSD
 #include <sys/sysctl.h>
 #include <errno.h>
+#elif defined __linux__
+#include <fstream>
+#include <ctype.h>
 #endif
 #include "backend/cpu/platform/BasicCpuInfo.h"
 #include <thread>
@@ -49,6 +52,75 @@ xmrig::BasicCpuInfo::BasicCpuInfo() :
 	int mib[] = { CTL_HW, HW_MODEL };
 	size_t model_len = sizeof m_brand;
 	if(sysctl(mib, 2, m_brand, &model_len, NULL, 0) < 0 && errno != ENOMEM) *m_brand = 0;
+#elif defined __linux__
+	std::ifstream stream("/proc/cpuinfo", std::ios_base::in);
+	if(stream.is_open()) {
+#if defined __sparc__ || defined __mips__ || defined __riscv
+		std::string value;
+#else
+		std::string value1, value2;
+#endif
+		std::string line;
+		while(std::getline(stream, line)) {
+			size_t colon_i = line.find(':');
+			if(colon_i == std::string::npos || !colon_i) continue;
+			size_t value_i = line.find_first_not_of(' ', colon_i + 1);
+			if(value_i == std::string::npos) continue;
+			size_t i = line.find_last_not_of(" 	", colon_i - 1);
+			i = (i == std::string::npos) ? colon_i : i + 1;
+#ifdef XMRIG_ARM
+			if(line.compare(0, i, "Hardware") == 0) value1.assign(line, value_i);
+			else if(line.compare(0, i, "Processor") == 0) {
+				if(isdigit(line[value_i])) continue;
+				value2.assign(line, value_i);
+			} else if(line.compare(0, i, "model name") == 0) value2.assign(line, value_i);
+#elif defined __sh__
+			if(line.compare(0, i, "machine") == 0) {
+				value1.assign(line, value_i);
+				value2.erase();
+				break;
+			}
+			if(line.compare(0, i, "cpu family") == 0) value1.assign(line, value_i);
+			else if(line.compare(0, i, "cpu type") == 0) value2.assign(line, value_i);
+#elif defined __powerpc__
+			if(line.compare(0, i, "vendor") == 0) value1.assign(line, value_i);
+			else if(line.compare(0, i, "cpu") == 0) value2.assign(line, value_i);
+			else continue;
+			if(!value1.empty() && !value2.empty()) break;
+#elif defined __sparc__
+			if(line.compare(0, i, "cpu") == 0) {
+				value.assign(line, value_i);
+				break;
+			}
+#elif defined __mips__
+			if(line.compare(0, i, "cpu model") == 0) {
+				value.assign(line, value_i);
+				break;
+			}
+#elif defined __riscv
+			if(line.compare(0, i, "uarch") == 0) {
+				value.assign(line, value_i);
+				break;
+			}
+#else
+			if(line.compare(0, i, "vendor_id") == 0) value1.assign(line, value_i);
+			else if(line.compare(0, i, "model name") == 0) value2.assign(line, value_i);
+			else continue;
+			if(!value1.empty() && !value2.empty()) break;
+#endif
+		}
+		stream.close();
+#if defined __sparc__ || defined __mips__ || defined __riscv
+		if(!value.empty()) value.copy(m_brand, sizeof m_brand - 1);
+#else
+		size_t len = value1.length();
+		if(len) value1.copy(m_brand, sizeof m_brand - 1);
+		if(!value2.empty() && len < sizeof m_brand - 1) {
+			if(len) m_brand[len] = ' ';
+			value2.copy(m_brand + len + 1, sizeof m_brand - 1 - len - 1);
+		}
+#endif
+	}
 #endif
 
 	if(!*m_brand) {
