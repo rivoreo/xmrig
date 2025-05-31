@@ -1,6 +1,6 @@
 # I still don't want to use cmake(1)
 
-DEFINES += -D HAVE_SYSLOG_H=1 -D _GNU_SOURCE=1 -D __STDC_FORMAT_MACROS=1
+DEFINES += -D _GNU_SOURCE=1 -D __STDC_FORMAT_MACROS=1
 # Linking to OpenSSL creates license issues, disable it for now
 DEFINES += -D XMRIG_NO_TLS=1
 DEFINES += -D XMRIG_NO_API=1 -D XMRIG_NO_HTTPD=1
