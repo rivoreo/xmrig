@@ -37,8 +37,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if defined(_M_X64) || defined(__x86_64__)
 #include "crypto/randomx/jit_compiler_x86_static.hpp"
-#elif defined(XMRIG_ARM)
+#elif defined __aarch64__
 #include "crypto/randomx/jit_compiler_a64_static.hpp"
+#elif defined __riscv && __riscv_xlen == 64
+#include "crypto/randomx/jit_compiler_rv64_static.hpp"
 #endif
 
 #include <cassert>
@@ -189,6 +191,8 @@ void RandomX_ConfigurationBase::Apply()
 
 	ConditionMask_Calculated = (1 << JumpBits) - 1;
 
+#ifdef XMRIG_FEATURE_RANDOMX_ASM
+
 #if defined(_M_X64) || defined(__x86_64__)
 	*(uint32_t*)(codeShhPrefetchTweaked + 3) = ArgonMemory * 16 - 1;
 	const uint32_t DatasetBaseMask = DatasetBaseSize - RANDOMX_DATASET_ITEM_SIZE;
@@ -201,7 +205,7 @@ void RandomX_ConfigurationBase::Apply()
 
 #define JIT_HANDLE(x, prev) randomx::JitCompilerX86::engine[k] = &randomx::JitCompilerX86::h_##x
 
-#elif defined(XMRIG_ARM)
+#elif defined __aarch64__
 
 	Log2_ScratchpadL1 = Log2(ScratchpadL1_Size);
 	Log2_ScratchpadL2 = Log2(ScratchpadL2_Size);
@@ -211,7 +215,14 @@ void RandomX_ConfigurationBase::Apply()
 
 #define JIT_HANDLE(x, prev) randomx::JitCompilerA64::engine[k] = &randomx::JitCompilerA64::h_##x
 
+#elif defined __riscv && __riscv_xlen == 64
+#define JIT_HANDLE(x, prev) randomx::RV64JitCompiler::opcodeMap1[k] = randomx::RV64JitCompiler::v1_##x
 #else
+#define JIT_HANDLE(x, prev)
+#endif
+
+#else
+
 #define JIT_HANDLE(x, prev)
 #endif
 

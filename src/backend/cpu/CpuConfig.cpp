@@ -39,7 +39,7 @@ static const char *kMaxThreadsHint      = "max-threads-hint";
 static const char *kMemoryPool          = "memory-pool";
 static const char *kPriority            = "priority";
 
-#ifdef XMRIG_FEATURE_ASM
+#ifdef XMRIG_FEATURE_CRYPTONIGHT_ASM
 static const char *kAsm = "asm";
 #endif
 
@@ -75,7 +75,7 @@ rapidjson::Value xmrig::CpuConfig::toJSON(rapidjson::Document &doc) const
         obj.AddMember(StringRef(kMaxThreadsHint), m_limit, allocator);
     }
 
-#   ifdef XMRIG_FEATURE_ASM
+#   ifdef XMRIG_FEATURE_CRYPTONIGHT_ASM
     obj.AddMember(StringRef(kAsm), m_assembly.toJSON(), allocator);
 #   endif
 
@@ -125,7 +125,7 @@ void xmrig::CpuConfig::read(const rapidjson::Value &value)
         setPriority(Json::getInt(value,  kPriority, -1));
         setMemoryPool(Json::getValue(value, kMemoryPool));
 
-#       ifdef XMRIG_FEATURE_ASM
+#       ifdef XMRIG_FEATURE_CRYPTONIGHT_ASM
         m_assembly = Json::getValue(value, kAsm);
 #       endif
 

@@ -27,6 +27,14 @@ GET_ARCH_COMMAND := arch=`uname -m` && case $$arch in i?86|i86*|amd64|x86_64) ec
 ARCH := $(shell $(GET_ARCH_COMMAND))
 endif
 
+ifdef WITH_ASM
+WITH_CRYPTONIGHT_ASM := 1
+WITH_RANDOMX_ASM := 1
+endif
+ifdef WITH_RANDOMX_JIT
+WITH_RANDOMX_ASM := 1
+endif
+
 SOURCES = \
     src/base/io/json/Json.cpp \
     src/base/io/json/JsonChain.cpp \
@@ -165,13 +173,18 @@ SOURCES += \
 	src/crypto/rx/RxDataset.cpp \
 	src/crypto/rx/RxQueue.cpp \
 	src/crypto/rx/RxVm.cpp
-ifdef WITH_ASM
+ifdef WITH_RANDOMX_ASM
+DEFINES += -D XMRIG_FEATURE_RANDOMX_ASM=1
 ifeq ($(ARCH),x86)
 SOURCES += \
 	src/crypto/randomx/jit_compiler_x86_static.S \
 	src/crypto/randomx/jit_compiler_x86.cpp
+else ifeq ($(ARCH),riscv64)
+SOURCES += \
+	src/crypto/randomx/jit_compiler_rv64_static.S \
+	src/crypto/randomx/jit_compiler_rv64.cpp
 endif
-endif	# WITH_ASM
+endif	# WITH_RANDOMX_ASM
 ifdef WITH_HWLOC
 SOURCES += \
 	src/crypto/rx/RxNUMAStorage.cpp \
@@ -193,8 +206,8 @@ SOURCES += \
 	src/3rdparty/argon2/lib/blake2/blake2.c
 endif
 
-ifdef WITH_ASM
-DEFINES += -D XMRIG_FEATURE_ASM=1
+ifdef WITH_CRYPTONIGHT_ASM
+DEFINES += -D XMRIG_FEATURE_CRYPTONIGHT_ASM=1
 SOURCES += \
 	src/crypto/common/Assembly.cpp \
 	src/crypto/cn/r/CryptonightR_gen.cpp
@@ -208,8 +221,8 @@ SOURCES += \
 	src/crypto/cn/asm/CryptonightR_template.S
 endif
 else
-DEFINES += -D XMRIG_NO_ASM=1
-endif	# WITH_ASM
+#DEFINES += -D XMRIG_NO_ASM=1
+endif	# WITH_CRYPTONIGHT_ASM
 
 ifdef WITH_HWLOC
 DEFINES += -D XMRIG_FEATURE_HWLOC=1

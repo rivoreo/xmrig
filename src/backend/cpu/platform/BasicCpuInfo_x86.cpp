@@ -148,7 +148,7 @@ xmrig::BasicCpuInfo::BasicCpuInfo() :
 {
     cpu_brand_string(m_brand);
 
-#   ifdef XMRIG_FEATURE_ASM
+#   ifdef XMRIG_FEATURE_CRYPTONIGHT_ASM
     if (hasAES()) {
         char vendor[13] = { 0 };
         int32_t data[4] = { 0 };

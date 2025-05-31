@@ -126,7 +126,7 @@ void xmrig::Api::exec(IApiRequest &request)
 #       ifdef XMRIG_FEATURE_API
         features.PushBack("api", allocator);
 #       endif
-#       ifdef XMRIG_FEATURE_ASM
+#       ifdef XMRIG_FEATURE_CRYPTONIGHT_ASM
         features.PushBack("asm", allocator);
 #       endif
 #       ifdef XMRIG_FEATURE_HTTP

@@ -138,6 +138,23 @@ void rx_reset_float_state() {
 	rx_set_double_precision(); //set precision to 53 bits if needed by the platform
 }
 
+#ifndef NDEBUG
+uint32_t rx_get_rounding_mode() {
+	switch(fegetround()) {
+		case FE_DOWNWARD:
+			return RoundDown;
+		case FE_UPWARD:
+			return RoundUp;
+		case FE_TOWARDZERO:
+			return RoundToZero;
+		case FE_TONEAREST:
+			return RoundToNearest;
+		default:
+			UNREACHABLE;
+	}
+}
+#endif
+
 void rx_set_rounding_mode(uint32_t mode) {
 	switch (mode & 3) {
 	case RoundDown:

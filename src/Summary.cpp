@@ -42,7 +42,7 @@
 namespace xmrig {
 
 
-#ifdef XMRIG_FEATURE_ASM
+#ifdef XMRIG_FEATURE_CRYPTONIGHT_ASM
 static const char *coloredAsmNames[] = {
     RED_BOLD("none"),
     "auto",
@@ -110,7 +110,7 @@ static void print_threads(Config *config)
                config->pools().donateLevel()
                );
 
-#   ifdef XMRIG_FEATURE_ASM
+#   ifdef XMRIG_FEATURE_CRYPTONIGHT_ASM
     if (config->cpu().assembly() == Assembly::AUTO) {
         const Assembly assembly = Cpu::info()->assembly();
 

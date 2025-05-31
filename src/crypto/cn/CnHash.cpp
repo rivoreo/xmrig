@@ -57,7 +57,7 @@
     m_map[algo][AV_PENTA_SOFT][Assembly::NONE]  = cryptonight_penta_hash<algo,  true>;
 
 
-#if (defined __i386 || defined __i386__ || defined __X86__ || defined __amd64 || defined __x86_64 || defined __amd64 || defined __amd64__) && defined XMRIG_FEATURE_ASM
+#if (defined __i386 || defined __i386__ || defined __X86__ || defined __amd64 || defined __x86_64 || defined __amd64 || defined __amd64__) && defined XMRIG_FEATURE_CRYPTONIGHT_ASM
 #   define ADD_FN_ASM(algo) \
     m_map[algo][AV_SINGLE][Assembly::INTEL]     = cryptonight_single_hash_asm<algo, Assembly::INTEL>;     \
     m_map[algo][AV_SINGLE][Assembly::RYZEN]     = cryptonight_single_hash_asm<algo, Assembly::RYZEN>;     \

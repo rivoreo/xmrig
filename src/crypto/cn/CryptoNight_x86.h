@@ -569,7 +569,7 @@ inline void cryptonight_single_hash(const uint8_t *__restrict__ input, size_t si
     uint64_t *h0 = reinterpret_cast<uint64_t*>(ctx[0]->state);
     uint8_t *l0   = ctx[0]->memory;
 
-#   ifdef XMRIG_FEATURE_ASM
+#   ifdef XMRIG_FEATURE_CRYPTONIGHT_ASM
     if (SOFT_AES && props.isR()) {
         if (!ctx[0]->generated_code_data.match(ALGO, height)) {
             V4_Instruction code[256];

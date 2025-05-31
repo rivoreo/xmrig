@@ -90,7 +90,7 @@ static const option options[] = {
     { "tls",                   0, nullptr, IConfig::TlsKey                },
     { "tls-fingerprint",       1, nullptr, IConfig::FingerprintKey        },
 #   endif
-#   ifdef XMRIG_FEATURE_ASM
+#   ifdef XMRIG_FEATURE_CRYPTONIGHT_ASM
     { "asm",                   1, nullptr, IConfig::AssemblyKey           },
 #   endif
 #   ifdef XMRIG_ALGO_RANDOMX

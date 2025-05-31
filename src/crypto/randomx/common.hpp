@@ -103,6 +103,7 @@ namespace randomx {
 #endif
 #endif
 
+#ifdef XMRIG_FEATURE_RANDOMX_ASM
 #if defined(_M_X64) || defined(__x86_64__)
 	#define RANDOMX_HAVE_COMPILER 1
 	class JitCompilerX86;
@@ -111,6 +112,15 @@ namespace randomx {
 	#define RANDOMX_HAVE_COMPILER 1
 	class JitCompilerA64;
 	using JitCompiler = JitCompilerA64;
+#elif defined __riscv && __riscv_xlen == 64
+	#define RANDOMX_HAVE_COMPILER 1
+	class RV64JitCompiler;
+	using JitCompiler = RV64JitCompiler;
+#else
+	#define RANDOMX_HAVE_COMPILER 0
+	class JitCompilerFallback;
+	using JitCompiler = JitCompilerFallback;
+#endif
 #else
 	#define RANDOMX_HAVE_COMPILER 0
 	class JitCompilerFallback;

@@ -79,7 +79,7 @@ rapidjson::Value xmrig::Cpu::toJSON(rapidjson::Document &doc)
     cpu.AddMember("nodes",      static_cast<uint64_t>(i->nodes()), allocator);
     cpu.AddMember("backend",    StringRef(i->backend()), allocator);
 
-#   ifdef XMRIG_FEATURE_ASM
+#   ifdef XMRIG_FEATURE_CRYPTONIGHT_ASM
     cpu.AddMember("assembly", StringRef(assembly.toString()), allocator);
 #   else
     cpu.AddMember("assembly", "none", allocator);
