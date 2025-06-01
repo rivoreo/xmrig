@@ -72,13 +72,15 @@ void xmrig::BaseConfig::printVersions()
 {
     char buf[256] = { 0 };
 
-#   if defined(__clang__)
+# if defined(__clang__)
     snprintf(buf, sizeof buf, "clang/%d.%d.%d", __clang_major__, __clang_minor__, __clang_patchlevel__);
-#   elif defined(__GNUC__)
+# elif defined __INTEL_COMPILER
+    snprintf(buf, sizeof buf, "ICC/%d.%d", __INTEL_COMPILER / 100, __INTEL_COMPILER % 100 / 10);
+# elif defined(__GNUC__)
     snprintf(buf, sizeof buf, "gcc/%d.%d.%d", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
-#   elif defined(_MSC_VER)
+# elif defined(_MSC_VER)
     snprintf(buf, sizeof buf, "MSVC/%d", MSVC_VERSION);
-#   endif
+# endif
 
     Log::print(GREEN_BOLD(" * ") WHITE_BOLD("%-13s") CYAN_BOLD("%s/%s") WHITE_BOLD(" %s"), "ABOUT", APP_NAME, APP_VERSION, buf);
 

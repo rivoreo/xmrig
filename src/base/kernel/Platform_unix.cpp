@@ -147,11 +147,13 @@ char *xmrig::Platform::createUserAgent()
     length += snprintf(buf + length, max - length, " CUDA/%d.%d", cudaVersion / 1000, cudaVersion % 100);
 #   endif
 
-#   ifdef __clang__
+# ifdef __clang__
     length += snprintf(buf + length, max - length, " clang/%d.%d.%d", __clang_major__, __clang_minor__, __clang_patchlevel__);
-#   elif defined(__GNUC__)
+# elif defined __INTEL_COMPILER
+    length += snprintf(buf + length, max - length, " ICC/%d.%d", __INTEL_COMPILER / 100, __INTEL_COMPILER % 100 / 10);
+# elif defined(__GNUC__)
     length += snprintf(buf + length, max - length, " gcc/%d.%d.%d", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
-#   endif
+# endif
 
     return buf;
 }

@@ -53,17 +53,20 @@ static int showVersion()
 {
     printf(APP_NAME " " APP_VERSION "\n built on " __DATE__
 
-#   if defined(__clang__)
-    " with clang " __clang_version__);
-#   elif defined(__GNUC__)
+# if defined(__clang__)
+    " with Clang " __clang_version__);
+# elif defined __INTEL_COMPILER
+    " with ICC");
+    printf(" %d.%d", __INTEL_COMPILER / 100, __INTEL_COMPILER % 100 / 10);
+# elif defined(__GNUC__)
     " with GCC");
     printf(" %d.%d.%d", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
-#   elif defined(_MSC_VER)
+# elif defined(_MSC_VER)
     " with MSVC");
     printf(" %d", MSVC_VERSION);
-#   else
+# else
     );
-#   endif
+# endif
 
     printf("\n\nUsing:\nlibuv/%s\n", uv_version_string());
 
