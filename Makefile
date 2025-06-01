@@ -17,6 +17,7 @@ CXXFLAGS += -O3
 endif
 #CXXFLAGS += -Dnullptr=__null -Dconstexpr=const -Doverride= -fpermissive
 CXXFLAGS += -D "alignas(b)=__attribute__((__aligned__))"
+ACFLAGS += $(DEFINES) $(INCLUDE_PATHS)
 LIBS += -l uv -l pthread
 
 # Need for FreeBSD
@@ -246,10 +247,22 @@ SOURCES += src/backend/cpu/platform/BasicCpuInfo.cpp
 #endif
 endif
 
-OBJECTS = $(addsuffix .o,$(basename $(SOURCES)))
+OBJECTS = $(addsuffix .o,$(basename $(patsubst src/%,build/%,$(SOURCES))))
 
 xmrig:	$(OBJECTS) $(DEPENDS)
 	$(CXX) $(LDFLAGS) $(OBJECTS) -o $@ $(LIBS)
+
+build/%.o:	src/%.c
+	@[ -d $(@D) ] || mkdir -p $(@D)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+build/%.o:	src/%.cpp
+	@[ -d $(@D) ] || mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+build/%.o:	src/%.S
+	@[ -d $(@D) ] || mkdir -p $(@D)
+	$(CC) $(ACFLAGS) -c $< -o $@
 
 clean:
 	$(MAKE) -C src/3rdparty/libcpuid/ $@
