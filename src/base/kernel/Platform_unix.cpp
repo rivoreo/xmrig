@@ -181,11 +181,6 @@ void xmrig::Platform::restoreTimerResolution()
 
 void xmrig::Platform::setProcessPriority(int priority)
 {
-}
-
-
-void xmrig::Platform::setThreadPriority(int priority)
-{
     if (priority == -1) {
         return;
     }
@@ -229,4 +224,12 @@ void xmrig::Platform::setThreadPriority(int priority)
         }
     }
 #   endif
+}
+
+
+void xmrig::Platform::setThreadPriority(int priority)
+{
+#ifdef __linux__
+	setProcessPriority(priority);
+#endif
 }
