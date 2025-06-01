@@ -37,6 +37,7 @@ endif
 
 SOURCES = \
     src/base/io/json/Json.cpp \
+    src/base/io/json/Json_unix.cpp \
     src/base/io/json/JsonChain.cpp \
     src/base/io/json/JsonRequest.cpp \
     src/base/io/log/backends/ConsoleLog.cpp \
@@ -48,6 +49,7 @@ SOURCES = \
     src/base/kernel/config/BaseTransform.cpp \
     src/base/kernel/Entry.cpp \
     src/base/kernel/Platform.cpp \
+    src/base/kernel/Platform_unix.cpp \
     src/base/kernel/Process.cpp \
     src/base/kernel/Signals.cpp \
     src/base/net/dns/Dns.cpp \
@@ -65,16 +67,6 @@ SOURCES = \
     src/base/tools/Buffer.cpp \
     src/base/tools/String.cpp \
     src/base/tools/Timer.cpp
-
-ifdef APPLE
-SOURCES += \
-	src/base/io/json/Json_unix.cpp \
-	src/base/kernel/Platform_mac.cpp
-else
-SOURCES += \
-	src/base/io/json/Json_unix.cpp \
-	src/base/kernel/Platform_unix.cpp
-endif
 
 DEFINES += -D HAVE_SYSLOG_H=1
 SOURCES += src/base/io/log/backends/SysLog.cpp

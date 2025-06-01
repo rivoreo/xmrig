@@ -21,13 +21,24 @@
  *   along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef __FreeBSD__
-#   include <sys/types.h>
-#   include <sys/param.h>
-#   include <sys/cpuset.h>
-#   include <pthread_np.h>
+#include <sys/param.h>
+#if defined __FreeBSD__ && !defined __FreeBSD_kernel__
+#define __FreeBSD_kernel__
+#endif
+#if defined __GLIBC__ || defined __gnu_hurd__
+// GNU is not BSD
+#undef BSD
 #endif
 
+#if defined __APPLE__ && defined __MACH__
+# include <mach/thread_act.h>
+# include <mach/thread_policy.h>
+#elif defined __FreeBSD_kernel__
+# include <sys/cpuset.h>
+# ifdef __FreeBSD__
+#  include <pthread_np.h>
+# endif
+#endif
 
 #include <pthread.h>
 #include <sched.h>
@@ -47,8 +58,55 @@
 #endif
 
 
-#ifdef __FreeBSD__
-typedef cpuset_t cpu_set_t;
+#ifdef __FreeBSD_kernel__
+#define cpu_set_t cpuset_t
+#endif
+
+#if defined __UCLIBC__
+ #ifdef __linux__
+ #define OS_NAME "uC/Linux"
+ #else
+ #define OS_NAME "uClibc"
+ #endif
+#elif defined __GLIBC__
+ #ifdef __linux__
+ #define OS_NAME "GNU/Linux"
+ #elif (defined __GNU__ && defined __MACH__) || defined __gnu_hurd__
+ #define OS_NAME "GNU/Hurd"
+ #elif defined __FreeBSD_kernel__
+ #define OS_NAME "GNU/kFreeBSD"
+ #elif defined __sun || defined __sun_kernel
+ #define OS_NAME "GNU/kOpenSolaris"
+ #else
+ #define OS_NAME "GNU"
+ #endif
+#elif defined __FreeBSD__
+#define OS_NAME "FreeBSD"
+#elif defined __NetBSD__
+#define OS_NAME "NetBSD"
+#elif defined __APPLE__
+ #ifdef __MACH__
+ //#define OS_NAME "Darwin"
+ #define OS_NAME "Mac OS X"
+ #else
+ #define OS_NAME "A/UX"
+ #endif
+#elif defined BSD
+#define OS_NAME "BSD"
+#elif defined __sun
+ #ifdef __SVR4
+ #define OS_NAME "Solaris"
+ #else
+ #define OS_NAME "SunOS"
+ #endif
+#elif defined __ANDROID__
+ #ifdef __linux__
+ #define OS_NAME "Android/Linux"
+ #else
+ #define OS_NAME "Android"
+ #endif
+#else
+ #define OS_NAME "unknown"
 #endif
 
 #ifdef __x86_64__
@@ -68,7 +126,7 @@ char *xmrig::Platform::createUserAgent()
     constexpr const size_t max = 256;
 
     char *buf = new char[max]();
-    int length = snprintf(buf, max, "%s/%s (Linux %s) libuv/%s", APP_NAME, APP_VERSION, MACHINE, uv_version_string());
+    int length = snprintf(buf, max, "%s/%s (%s %s) libuv/%s", APP_NAME, APP_VERSION, OS_NAME, MACHINE, uv_version_string());
 
 #   ifdef XMRIG_NVIDIA_PROJECT
     const int cudaVersion = cuda_get_runtime_version();
@@ -88,15 +146,24 @@ char *xmrig::Platform::createUserAgent()
 #ifndef XMRIG_FEATURE_HWLOC
 bool xmrig::Platform::setThreadAffinity(uint64_t cpu_id)
 {
+#if defined __APPLE__ && defined __MACH__
+    thread_port_t mach_thread;
+    thread_affinity_policy_data_t policy = { static_cast<integer_t>(cpu_id) };
+    mach_thread = pthread_mach_thread_np(pthread_self());
+
+    return thread_policy_set(mach_thread, THREAD_AFFINITY_POLICY, (thread_policy_t)&policy, 1) == KERN_SUCCESS;
+#else
     cpu_set_t mn;
     CPU_ZERO(&mn);
     CPU_SET(cpu_id, &mn);
-
-#   ifndef __ANDROID__
-    return pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &mn) == 0;
-#   else
+# ifdef __ANDROID__
     return sched_setaffinity(gettid(), sizeof(cpu_set_t), &mn) == 0;
-#   endif
+# elif defined __FreeBSD_kernel__ && !defined __FreeBSD__
+    return cpuset_setaffinity(CPU_LEVEL_WHICH, CPU_WHICH_TID, -1, sizeof mn, &mn) == 0;
+# else
+    return pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &mn) == 0;
+# endif
+#endif
 }
 #endif
 
