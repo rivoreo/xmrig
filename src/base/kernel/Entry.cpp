@@ -65,19 +65,7 @@ static int showVersion()
     );
 #   endif
 
-    printf("\n features:"
-#   if defined(__i386__) || defined(_M_IX86)
-    " 32-bit"
-#   elif defined(__x86_64__) || defined(_M_AMD64)
-    " 64-bit"
-#   endif
-
-#   if defined(__AES__) || defined(_MSC_VER)
-    " AES"
-#   endif
-    "\n");
-
-    printf("\nlibuv/%s\n", uv_version_string());
+    printf("\n\nUsing:\nlibuv/%s\n", uv_version_string());
 
 #   if defined(XMRIG_FEATURE_TLS) && defined(OPENSSL_VERSION_TEXT)
     {
