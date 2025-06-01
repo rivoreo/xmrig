@@ -1,4 +1,24 @@
-# I still don't want to use cmake(1)
+
+# Copyright 2015-2025 Rivoreo
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to
+# deal in the Software without restriction, including without limitation the
+# rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+# sell copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+# WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+# IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 
 DEFINES += -D _GNU_SOURCE=1 -D __STDC_FORMAT_MACROS=1
 # Linking to OpenSSL creates license issues, disable it for now
@@ -231,8 +251,8 @@ ifdef WITH_LIBCPUID
 DEFINES += -D XMRIG_FEATURE_LIBCPUID=1
 INCLUDE_PATHS += -I src/3rdparty/libcpuid
 #LIBS += -l cpuid
-DEPENDS += src/3rdparty/libcpuid/libcpuid.a
-LIBS += src/3rdparty/libcpuid/libcpuid.a
+DEPENDS += build/3rdparty/libcpuid/libcpuid.a
+LIBS += build/3rdparty/libcpuid/libcpuid.a
 SOURCES += src/backend/cpu/platform/AdvancedCpuInfo.cpp
 ifdef WITH_HWLOC
 SOURCES += src/backend/cpu/platform/BasicCpuInfo.cpp
@@ -265,8 +285,9 @@ build/%.o:	src/%.S
 	$(CC) $(ACFLAGS) -c $< -o $@
 
 clean:
-	$(MAKE) -C src/3rdparty/libcpuid/ $@
+	BUILD_DIR=$(PWD)/build/3rdparty/libcpuid $(MAKE) -C src/3rdparty/libcpuid/ $@
 	rm -f $(OBJECTS)
 
-src/3rdparty/libcpuid/libcpuid.a:
-	$(MAKE) -C src/3rdparty/libcpuid/
+build/3rdparty/libcpuid/libcpuid.a:
+	@[ -d $(@D) ] || mkdir -p $(@D)
+	BUILD_DIR=$(PWD)/build/3rdparty/libcpuid $(MAKE) -C src/3rdparty/libcpuid/
