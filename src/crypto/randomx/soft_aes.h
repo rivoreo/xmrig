@@ -33,6 +33,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 #include "crypto/randomx/intrin_portable.h"
 
+#define CHECK_BIG_ENDIAN() (((union { uint8_t ba[2]; uint16_t i; }){ .ba = { 0, 1 } }).i == 1)
+
 extern uint32_t lutEnc0[256];
 extern uint32_t lutEnc1[256];
 extern uint32_t lutEnc2[256];
@@ -47,56 +49,104 @@ template<bool soft> rx_vec_i128 aesdec(rx_vec_i128 in, rx_vec_i128 key);
 
 template<>
 FORCE_INLINE rx_vec_i128 aesenc<true>(rx_vec_i128 in, rx_vec_i128 key) {
-	volatile uint8_t s[16];
+	uint8_t s[16];
 	memcpy((void*) s, &in, 16);
 
-	uint32_t s0 = lutEnc0[s[ 0]];
-	uint32_t s1 = lutEnc0[s[ 4]];
-	uint32_t s2 = lutEnc0[s[ 8]];
-	uint32_t s3 = lutEnc0[s[12]];
+	uint32_t s0, s1, s2, s3;
 
-	s0 ^= lutEnc1[s[ 5]];
-	s1 ^= lutEnc1[s[ 9]];
-	s2 ^= lutEnc1[s[13]];
-	s3 ^= lutEnc1[s[ 1]];
+	if(CHECK_BIG_ENDIAN()) {
+		s0 = lutEnc0[s[ 3]];
+		s1 = lutEnc0[s[ 7]];
+		s2 = lutEnc0[s[11]];
+		s3 = lutEnc0[s[15]];
 
-	s0 ^= lutEnc2[s[10]];
-	s1 ^= lutEnc2[s[14]];
-	s2 ^= lutEnc2[s[ 2]];
-	s3 ^= lutEnc2[s[ 6]];
+		s0 ^= lutEnc1[s[ 6]];
+		s1 ^= lutEnc1[s[10]];
+		s2 ^= lutEnc1[s[14]];
+		s3 ^= lutEnc1[s[ 2]];
 
-	s0 ^= lutEnc3[s[15]];
-	s1 ^= lutEnc3[s[ 3]];
-	s2 ^= lutEnc3[s[ 7]];
-	s3 ^= lutEnc3[s[11]];
+		s0 ^= lutEnc2[s[ 9]];
+		s1 ^= lutEnc2[s[13]];
+		s2 ^= lutEnc2[s[ 1]];
+		s3 ^= lutEnc2[s[ 5]];
+
+		s0 ^= lutEnc3[s[12]];
+		s1 ^= lutEnc3[s[ 0]];
+		s2 ^= lutEnc3[s[ 4]];
+		s3 ^= lutEnc3[s[ 8]];
+	} else {
+		s0 = lutEnc0[s[ 0]];
+		s1 = lutEnc0[s[ 4]];
+		s2 = lutEnc0[s[ 8]];
+		s3 = lutEnc0[s[12]];
+
+		s0 ^= lutEnc1[s[ 5]];
+		s1 ^= lutEnc1[s[ 9]];
+		s2 ^= lutEnc1[s[13]];
+		s3 ^= lutEnc1[s[ 1]];
+
+		s0 ^= lutEnc2[s[10]];
+		s1 ^= lutEnc2[s[14]];
+		s2 ^= lutEnc2[s[ 2]];
+		s3 ^= lutEnc2[s[ 6]];
+
+		s0 ^= lutEnc3[s[15]];
+		s1 ^= lutEnc3[s[ 3]];
+		s2 ^= lutEnc3[s[ 7]];
+		s3 ^= lutEnc3[s[11]];
+	}
 
 	return rx_xor_vec_i128(rx_set_int_vec_i128(s3, s2, s1, s0), key);
 }
 
 template<>
 FORCE_INLINE rx_vec_i128 aesdec<true>(rx_vec_i128 in, rx_vec_i128 key) {
-	volatile uint8_t s[16];
+	uint8_t s[16];
 	memcpy((void*) s, &in, 16);
 
-	uint32_t s0 = lutDec0[s[ 0]];
-	uint32_t s1 = lutDec0[s[ 4]];
-	uint32_t s2 = lutDec0[s[ 8]];
-	uint32_t s3 = lutDec0[s[12]];
+	uint32_t s0, s1, s2, s3;
 
-	s0 ^= lutDec1[s[13]];
-	s1 ^= lutDec1[s[ 1]];
-	s2 ^= lutDec1[s[ 5]];
-	s3 ^= lutDec1[s[ 9]];
+	if(CHECK_BIG_ENDIAN()) {
+		s0 = lutDec0[s[ 3]];
+		s1 = lutDec0[s[ 7]];
+		s2 = lutDec0[s[11]];
+		s3 = lutDec0[s[15]];
 
-	s0 ^= lutDec2[s[10]];
-	s1 ^= lutDec2[s[14]];
-	s2 ^= lutDec2[s[ 2]];
-	s3 ^= lutDec2[s[ 6]];
+		s0 ^= lutDec1[s[14]];
+		s1 ^= lutDec1[s[ 2]];
+		s2 ^= lutDec1[s[ 6]];
+		s3 ^= lutDec1[s[10]];
 
-	s0 ^= lutDec3[s[ 7]];
-	s1 ^= lutDec3[s[11]];
-	s2 ^= lutDec3[s[15]];
-	s3 ^= lutDec3[s[ 3]];
+		s0 ^= lutDec2[s[ 9]];
+		s1 ^= lutDec2[s[13]];
+		s2 ^= lutDec2[s[ 1]];
+		s3 ^= lutDec2[s[ 5]];
+
+		s0 ^= lutDec3[s[ 4]];
+		s1 ^= lutDec3[s[ 8]];
+		s2 ^= lutDec3[s[12]];
+		s3 ^= lutDec3[s[ 0]];
+	} else {
+		s0 = lutDec0[s[ 0]];
+		s1 = lutDec0[s[ 4]];
+		s2 = lutDec0[s[ 8]];
+		s3 = lutDec0[s[12]];
+
+		s0 ^= lutDec1[s[13]];
+		s1 ^= lutDec1[s[ 1]];
+		s2 ^= lutDec1[s[ 5]];
+		s3 ^= lutDec1[s[ 9]];
+
+		s0 ^= lutDec2[s[10]];
+		s1 ^= lutDec2[s[14]];
+		s2 ^= lutDec2[s[ 2]];
+		s3 ^= lutDec2[s[ 6]];
+
+		s0 ^= lutDec3[s[ 7]];
+		s1 ^= lutDec3[s[11]];
+		s2 ^= lutDec3[s[15]];
+		s3 ^= lutDec3[s[ 3]];
+	}
 
 	return rx_xor_vec_i128(rx_set_int_vec_i128(s3, s2, s1, s0), key);
 }

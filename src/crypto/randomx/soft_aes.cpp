@@ -94,10 +94,17 @@ static struct SAESInitializer
 			};
 
 			uint32_t s = sbox[i];
-			p[0] = mul_gf2(s, 2);
-			p[1] = s;
-			p[2] = s;
-			p[3] = mul_gf2(s, 3);
+			if(CHECK_BIG_ENDIAN()) {
+				p[0] = mul_gf2(s, 3);
+				p[1] = s;
+				p[2] = s;
+				p[3] = mul_gf2(s, 2);
+			} else {
+				p[0] = mul_gf2(s, 2);
+				p[1] = s;
+				p[2] = s;
+				p[3] = mul_gf2(s, 3);
+			}
 
 			lutEnc0[i] = w; w = (w << 8) | (w >> 24);
 			lutEnc1[i] = w; w = (w << 8) | (w >> 24);
@@ -105,10 +112,17 @@ static struct SAESInitializer
 			lutEnc3[i] = w;
 
 			s = sbox_reverse[i];
-			p[0] = mul_gf2(s, 0xe);
-			p[1] = mul_gf2(s, 0x9);
-			p[2] = mul_gf2(s, 0xd);
-			p[3] = mul_gf2(s, 0xb);
+			if(CHECK_BIG_ENDIAN()) {
+				p[0] = mul_gf2(s, 0xb);
+				p[1] = mul_gf2(s, 0xd);
+				p[2] = mul_gf2(s, 0x9);
+				p[3] = mul_gf2(s, 0xe);
+			} else {
+				p[0] = mul_gf2(s, 0xe);
+				p[1] = mul_gf2(s, 0x9);
+				p[2] = mul_gf2(s, 0xd);
+				p[3] = mul_gf2(s, 0xb);
+			}
 
 			lutDec0[i] = w; w = (w << 8) | (w >> 24);
 			lutDec1[i] = w; w = (w << 8) | (w >> 24);
