@@ -110,15 +110,15 @@
 #endif
 
 #ifdef __x86_64__
-#define MACHINE "x86_64"
+#define ARCH_NAME "x86_64"
 #elif defined __aarch64__
-#define MACHINE "aarch64"
+#define ARCH_NAME "aarch64"
 #elif defined __arm__
-#define MACHINE "arm"
+#define ARCH_NAME "arm"
 #elif defined __i386__
-#define MACHINE "i386"
+#define ARCH_NAME "i386"
 #else
-#define MACHINE "unknown"
+#define ARCH_NAME "unknown"
 #endif
 
 char *xmrig::Platform::createUserAgent()
@@ -126,7 +126,7 @@ char *xmrig::Platform::createUserAgent()
     constexpr const size_t max = 256;
 
     char *buf = new char[max]();
-    int length = snprintf(buf, max, "%s/%s (%s %s) libuv/%s", APP_NAME, APP_VERSION, OS_NAME, MACHINE, uv_version_string());
+    int length = snprintf(buf, max, "%s/%s (%s %s) libuv/%s", APP_NAME, APP_VERSION, OS_NAME, ARCH_NAME, uv_version_string());
 
 #   ifdef XMRIG_NVIDIA_PROJECT
     const int cudaVersion = cuda_get_runtime_version();
