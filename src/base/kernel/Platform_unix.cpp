@@ -6,6 +6,7 @@
  * Copyright 2016      Jay D Dee   <jayddee246@gmail.com>
  * Copyright 2017-2018 XMR-Stak    <https://github.com/fireice-uk>, <https://github.com/psychocrypt>
  * Copyright 2016-2018 XMRig       <https://github.com/xmrig>, <support@xmrig.com>
+ * Copyright 2018-2025 Rivoreo
  *
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -117,6 +118,14 @@
 #define ARCH_NAME "arm"
 #elif defined __i386__
 #define ARCH_NAME "i386"
+#elif defined __riscv && __riscv_xlen == 32
+#define ARCH_NAME "riscv32"
+#elif defined __riscv && __riscv_xlen == 64
+#define ARCH_NAME "riscv64"
+#elif defined __powerpc64__
+#define ARCH_NAME "powerpc64"
+#elif defined __powerpc__
+#define ARCH_NAME "powerpc"
 #else
 #define ARCH_NAME "unknown"
 #endif
