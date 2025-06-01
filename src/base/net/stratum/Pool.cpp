@@ -247,7 +247,7 @@ rapidjson::Value xmrig::Pool::toJSON(rapidjson::Document &doc) const
 
 std::string xmrig::Pool::printableName() const
 {
-    std::string out(CSI "1;" + std::to_string(isEnabled() ? (isTLS() ? 32 : 36) : 31) + "m" + url().data() + CLEAR);
+    std::string out(CSI "1;" + std::string(isEnabled() ? (isTLS() ? "32" : "36") : "31") + "m" + url().data() + CLEAR);
 
     if (m_coin.isValid()) {
         out += std::string(" coin ") + WHITE_BOLD_S + m_coin.name() + CLEAR;
@@ -257,7 +257,7 @@ std::string xmrig::Pool::printableName() const
     }
 
     if (m_mode == MODE_SELF_SELECT) {
-        out += std::string(" self-select ") + CSI "1;" + std::to_string(m_daemon.isTLS() ? 32 : 36) + "m" + m_daemon.url().data() + CLEAR;
+        out += std::string(" self-select ") + CSI "1;" + std::string(m_daemon.isTLS() ? "32" : "36") + "m" + m_daemon.url().data() + CLEAR;
     }
 
     return out;
