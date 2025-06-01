@@ -36,11 +36,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "crypto/randomx/blake2/blake2.h"
 
 #if defined(_M_X64) || defined(__x86_64__)
-#include "crypto/randomx/jit_compiler_x86_static.hpp"
+#include "crypto/randomx/jit_compiler_amd64_static.hpp"
 #elif defined __aarch64__
-#include "crypto/randomx/jit_compiler_a64_static.hpp"
+#include "crypto/randomx/jit_compiler_aarch64_static.hpp"
 #elif defined __riscv && __riscv_xlen == 64
-#include "crypto/randomx/jit_compiler_rv64_static.hpp"
+#include "crypto/randomx/jit_compiler_riscv64_static.hpp"
 #endif
 
 #include <cassert>

@@ -33,7 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include <stdexcept>
 #include "crypto/randomx/common.hpp"
-#include "crypto/randomx/jit_compiler_a64_static.hpp"
+#include "crypto/randomx/jit_compiler_aarch64_static.hpp"
 
 namespace randomx {
 

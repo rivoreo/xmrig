@@ -65,11 +65,11 @@ namespace randomx {
 
 #ifdef XMRIG_FEATURE_RANDOMX_ASM
 #if defined(_M_X64) || defined(__x86_64__)
-#include "crypto/randomx/jit_compiler_x86.hpp"
+#include "crypto/randomx/jit_compiler_amd64.hpp"
 #elif defined(__aarch64__)
-#include "crypto/randomx/jit_compiler_a64.hpp"
+#include "crypto/randomx/jit_compiler_aarch64.hpp"
 #elif defined __riscv && __riscv_xlen == 64
-#include "crypto/randomx/jit_compiler_rv64.hpp"
+#include "crypto/randomx/jit_compiler_riscv64.hpp"
 #else
 #include "crypto/randomx/jit_compiler_fallback.hpp"
 #endif

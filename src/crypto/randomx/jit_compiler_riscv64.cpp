@@ -30,8 +30,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstring>
 #include <climits>
 #include <cassert>
-#include "crypto/randomx/jit_compiler_rv64.hpp"
-#include "crypto/randomx/jit_compiler_rv64_static.hpp"
+#include "crypto/randomx/jit_compiler_riscv64.hpp"
+#include "crypto/randomx/jit_compiler_riscv64_static.hpp"
 #include "crypto/randomx/superscalar.hpp"
 #include "crypto/randomx/program.hpp"
 #include "crypto/randomx/reciprocal.h"

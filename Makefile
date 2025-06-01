@@ -44,7 +44,7 @@ LIBS += -l uv -l pthread
 #LIBS += -lkvm
 
 ifndef ARCH
-GET_ARCH_COMMAND := arch=`uname -m` && case $$arch in i?86|i86*|amd64|x86_64) echo x86; ;; arm*|aarch64) echo arm; ;; *) echo $$arch; ;; esac
+GET_ARCH_COMMAND := arch=`uname -m` && case $$arch in amd64|x86_64) echo amd64; ;; i?86|i86*) echo i386; ;; aarch64|arm64) echo aarch64; ;; arm*) echo arm; ;; *) echo $$arch; ;; esac
 ARCH := $(shell $(GET_ARCH_COMMAND))
 endif
 
@@ -188,15 +188,9 @@ SOURCES += \
 	src/crypto/rx/RxVm.cpp
 ifdef WITH_RANDOMX_ASM
 DEFINES += -D XMRIG_FEATURE_RANDOMX_ASM=1
-ifeq ($(ARCH),x86)
 SOURCES += \
-	src/crypto/randomx/jit_compiler_x86_static.S \
-	src/crypto/randomx/jit_compiler_x86.cpp
-else ifeq ($(ARCH),riscv64)
-SOURCES += \
-	src/crypto/randomx/jit_compiler_rv64_static.S \
-	src/crypto/randomx/jit_compiler_rv64.cpp
-endif
+	src/crypto/randomx/jit_compiler_$(ARCH).cpp \
+	src/crypto/randomx/jit_compiler_$(ARCH)_static.S
 endif	# WITH_RANDOMX_ASM
 ifdef WITH_HWLOC
 SOURCES += \
@@ -259,12 +253,7 @@ SOURCES += src/backend/cpu/platform/BasicCpuInfo.cpp
 endif
 else
 DEFINES += -D XMRIG_NO_LIBCPUID=1
-#SOURCES += src/common/cpu/Cpu.cpp
-#ifeq ($(ARCH),arm)
-#SOURCES += src/backend/cpu/platform/BasicCpuInfo_arm.cpp
-#else
 SOURCES += src/backend/cpu/platform/BasicCpuInfo.cpp
-#endif
 endif
 
 OBJECTS = $(addsuffix .o,$(basename $(patsubst src/%,build/%,$(SOURCES))))
