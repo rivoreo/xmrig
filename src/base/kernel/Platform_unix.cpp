@@ -61,6 +61,11 @@
 
 #ifdef __FreeBSD_kernel__
 #define cpu_set_t cpuset_t
+#if !defined __FreeBSD__ && defined __GLIBC__
+// GNU C Library didn't provide a wrapper for cpuset_setaffinity(2)
+#include <sys/syscall.h>
+#define cpuset_setaffinity(level,which,id,size,mask) syscall(SYS_cpuset_setaffinity,(level),(which),(id),(size),(mask))
+#endif
 #endif
 
 #if defined __UCLIBC__

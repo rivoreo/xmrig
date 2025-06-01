@@ -23,6 +23,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+#include <sys/param.h>
 #include "libcpuid.h"
 #include "libcpuid_internal.h"
 #include "recog_intel.h"
@@ -55,8 +57,12 @@ static void cpu_id_t_constructor(struct cpu_id_t* id)
 	id->sse_size = -1;
 }
 
+#if defined __FreeBSD__ && !defined __FreeBSD_kernel__
+#define __FreeBSD_kernel__
+#endif
+
 /* get_total_cpus() system specific code: uses OS routines to determine total number of CPUs */
-#ifdef __APPLE__
+#if defined __APPLE__ && defined __MACH__
 #include <unistd.h>
 #include <mach/clock_types.h>
 #include <mach/clock.h>
@@ -72,10 +78,7 @@ static int get_total_cpus(void)
 	if (kr != KERN_SUCCESS) return 1;
 	return basic_info.avail_cpus;
 }
-#define GET_TOTAL_CPUS_DEFINED
-#endif
-
-#ifdef _WIN32
+#elif defined _WIN32
 #include <windows.h>
 static int get_total_cpus(void)
 {
@@ -83,24 +86,8 @@ static int get_total_cpus(void)
 	GetSystemInfo(&system_info);
 	return system_info.dwNumberOfProcessors;
 }
-#define GET_TOTAL_CPUS_DEFINED
-#endif
-
-#if defined linux || defined __linux__ || defined __sun
-#include <sys/sysinfo.h>
-#include <unistd.h>
- 
-static int get_total_cpus(void)
-{
-	return sysconf(_SC_NPROCESSORS_ONLN);
-}
-#define GET_TOTAL_CPUS_DEFINED
-#endif
-
-#if defined __FreeBSD__ || defined __OpenBSD__ || defined __NetBSD__ || defined __bsdi__ || defined __QNX__
-#include <sys/types.h>
+#elif defined __FreeBSD_kernel__ || defined __OpenBSD__ || defined __NetBSD__ || defined __bsdi__ || defined __QNX__
 #include <sys/sysctl.h>
-
 static int get_total_cpus(void)
 {
 	int mib[2] = { CTL_HW, HW_NCPU };
@@ -109,22 +96,13 @@ static int get_total_cpus(void)
 	if (sysctl(mib, 2, &ncpus, &len, (void *) 0, 0) != 0) return 1;
 	return ncpus;
 }
-#define GET_TOTAL_CPUS_DEFINED
-#endif
-
-#ifndef GET_TOTAL_CPUS_DEFINED
+#else
+#include <unistd.h>
 static int get_total_cpus(void)
 {
-	static int warning_printed = 0;
-	if (!warning_printed) {
-		warning_printed = 1;
-		warnf("Your system is not supported by libcpuid -- don't know how to detect the\n");
-		warnf("total number of CPUs on your system. It will be reported as 1.\n");
-		printf("Please use cpu_id_t.logical_cpus field instead.\n");
-	}
-	return 1;
+	return sysconf(_SC_NPROCESSORS_ONLN);
 }
-#endif /* GET_TOTAL_CPUS_DEFINED */
+#endif
 
 
 static void load_features_common(struct cpu_raw_data_t* raw, struct cpu_id_t* data)

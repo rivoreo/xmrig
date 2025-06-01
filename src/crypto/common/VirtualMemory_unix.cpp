@@ -25,6 +25,10 @@
  */
 
 
+#include <sys/param.h>
+#if defined __FreeBSD__ && !defined __FreeBSD_kernel__
+#define __FreeBSD_kernel__
+#endif
 #include <cstdlib>
 #include <sys/mman.h>
 #if !defined MAP_HUGETLB && defined __GLIBC__ && defined __linux__
@@ -39,6 +43,20 @@
 #endif
 
 
+#ifndef MAP_ANON
+#define MAP_ANON MAP_ANONYMOUS
+#endif
+
+#ifdef __FreeBSD_kernel__
+#ifndef MAP_PREFAULT_READ
+#define MAP_PREFAULT_READ 0x00040000
+#endif
+#ifndef MAP_ALIGNED_SUPER
+#define MAP_ALIGNED_SUPER (1 << 24)
+#endif
+#endif
+
+
 bool xmrig::VirtualMemory::isHugepagesAvailable()
 {
     return true;
@@ -47,12 +65,7 @@ bool xmrig::VirtualMemory::isHugepagesAvailable()
 
 void *xmrig::VirtualMemory::allocateExecutableMemory(size_t size)
 {
-#   if defined(__APPLE__)
     void *mem = mmap(0, size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANON, -1, 0);
-#   else
-    void *mem = mmap(0, size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-#   endif
-
     return mem == MAP_FAILED ? nullptr : mem;
 }
 
@@ -61,7 +74,7 @@ void *xmrig::VirtualMemory::allocateLargePagesMemory(size_t size)
 {
 #   if defined(__APPLE__)
     void *mem = mmap(0, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, VM_FLAGS_SUPERPAGE_SIZE_2MB, 0);
-#   elif defined(__FreeBSD__)
+#   elif defined(__FreeBSD_kernel__)
     void *mem = mmap(0, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_ALIGNED_SUPER | MAP_PREFAULT_READ, -1, 0);
 #   else
     void *mem = mmap(0, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB | MAP_POPULATE, 0, 0);
