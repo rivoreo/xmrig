@@ -1,113 +1,62 @@
 # XMRig
 
-**:warning: [Monero will change PoW algorithm to RandomX on November 30.](https://github.com/xmrig/xmrig/issues/1204)**
+This fork focuses only on RandomX CPU mining, on different CPU architectures and Unix-like operating systems.
 
-[![Github All Releases](https://img.shields.io/github/downloads/xmrig/xmrig/total.svg)](https://github.com/xmrig/xmrig/releases)
-[![GitHub release](https://img.shields.io/github/release/xmrig/xmrig/all.svg)](https://github.com/xmrig/xmrig/releases)
-[![GitHub Release Date](https://img.shields.io/github/release-date-pre/xmrig/xmrig.svg)](https://github.com/xmrig/xmrig/releases)
-[![GitHub license](https://img.shields.io/github/license/xmrig/xmrig.svg)](https://github.com/xmrig/xmrig/blob/master/LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/xmrig/xmrig.svg)](https://github.com/xmrig/xmrig/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/xmrig/xmrig.svg)](https://github.com/xmrig/xmrig/network)
+## Supported Architectures with RandomX JIT Compiler
 
-XMRig High performance, open source, cross platform RandomX, CryptoNight and Argon2 CPU/GPU miner, with official support for Windows.
+* **x86-64**
+* **AArch64**
+* **64-bit RISC-V**
 
-## Mining backends
-- **CPU** (x64/x86/ARM)
-- **OpenCL** for AMD GPUs.
-- **CUDA** for NVIDIA GPUs via external [CUDA plugin](https://github.com/xmrig/xmrig-cuda).
+## Screenshots
 
-<img src="doc/screenshot.png" width="808" >
+![XMRig built with GCC running on SiFive U74](doc/gcc-sifive-u74.png)
+![XMRig built with GCC running on AMD Ryzen 5 3500U](doc/gcc-amd-ryzen-5-3500u.png)
+![XMRig built with ICC running on Intel Xeon E5-2680 v4](doc/icc-intel-xeon-e5-2680-v4.png)
 
-## Download
-* Binary releases: https://github.com/xmrig/xmrig/releases
-* Git tree: https://github.com/xmrig/xmrig.git
-  * Clone with `git clone https://github.com/xmrig/xmrig.git` :hammer: [Build instructions](https://github.com/xmrig/xmrig/wiki/Build).
+## Build
 
-## Usage
-The preferred way to configure the miner is the [JSON config file](src/config.json) as it is more flexible and human friendly. The command line interface does not cover all features, such as mining profiles for different algorithms. Important options can be changed during runtime without miner restart by editing the config file or executing API calls.
+Building for architectures other than x86 and ARM requires **simde** headers, to help getting the currently mandatory CryptoNight code compiled; even if such code is not being used for running RandomX.
 
-* **[xmrig.com/wizard](https://xmrig.com/wizard)** helps you create initial configuration for the miner.
-* **[workers.xmrig.info](http://workers.xmrig.info)** helps manage your miners via HTTP API.
+This source tree uses **GNU Make** as the build system. You will need to set a series of environment variables when running **make(1)**. The available environment variables are:
 
-### Command line options
-```
-Network:
-  -o, --url=URL                 URL of mining server
-  -a, --algo=ALGO               mining algorithm https://xmrig.com/docs/algorithms
-      --coin=COIN               specify coin instead of algorithm
-  -u, --user=USERNAME           username for mining server
-  -p, --pass=PASSWORD           password for mining server
-  -O, --userpass=U:P            username:password pair for mining server
-  -k, --keepalive               send keepalived packet for prevent timeout (needs pool support)
-      --nicehash                enable nicehash.com support
-      --rig-id=ID               rig identifier for pool-side statistics (needs pool support)
-      --tls                     enable SSL/TLS support (needs pool support)
-      --tls-fingerprint=HEX     pool TLS certificate fingerprint for strict certificate pinning
-      --daemon                  use daemon RPC instead of pool for solo mining
-      --daemon-poll-interval=N  daemon poll interval in milliseconds (default: 1000)
-  -r, --retries=N               number of times to retry before switch to backup server (default: 5)
-  -R, --retry-pause=N           time to pause between retries (default: 5)
-      --user-agent              set custom user-agent string for pool
-      --donate-level=N          donate level, default 5%% (5 minutes in 100 minutes)
-      --donate-over-proxy=N     control donate over xmrig-proxy feature
+Environment Variable   | Description
+---------------------- | -----------------------------------------------------
+`CC`                   | C compiler command name
+`CFLAGS`               | Additional flags to pass to C compiler (e.g. `-march=native`)
+`CXX`                  | C++ compiler command name
+`CXXFLAGS`             | Additional flags to pass to C++ compiler (e.g. `-march=native`)
+`LDFLAGS`              | Additional flags to pass during linking
+`LIBS`                 | `-l` options for linking with additional libraries
+`ARCH`                 | Set target architecture for cross-building
+`WITH_HWLOC`           | Set this to enable uses of external hwloc library
+`WITH_LIBCPUID`        | Set this to enable uses of bundled libcpuid
+`WITH_RANDOMX`         | Set this to enable RandomX algorithm support
+`WITH_ARGON2`          | Set this to enable Argon2 algorithm support
+`WITH_HTTP`            | Set this to enable HTTP-related features
+`WITH_CRYPTONIGHT_ASM` | Set this to include CryptoNight assembly codes
+`WITH_RANDOMX_ASM`     | Set this to include RandomX assembly codes that enable JIT compiler
+`WITH_RANDOMX_JIT`     | Synonym for `WITH_RANDOMX_ASM`
+`WITH_ASM`             | Shortcut for enabling both `WITH_CRYPTONIGHT_ASM` and `WITH_RANDOMX_ASM`
 
-CPU backend:
-      --no-cpu                  disable CPU mining backend
-  -t, --threads=N               number of CPU threads
-  -v, --av=N                    algorithm variation, 0 auto select
-      --cpu-affinity            set process affinity to CPU core(s), mask 0x3 for cores 0 and 1
-      --cpu-priority            set process priority (0 idle, 2 normal to 5 highest)
-      --cpu-max-threads-hint=N  maximum CPU threads count (in percentage) hint for autoconfig
-      --cpu-memory-pool=N       number of 2 MB pages for persistent memory pool, -1 (auto), 0 (disable)
-      --no-huge-pages           disable huge pages support
-      --asm=ASM                 ASM optimizations, possible values: auto, none, intel, ryzen, bulldozer
-      --randomx-init=N          threads count to initialize RandomX dataset
-      --randomx-no-numa         disable NUMA support for RandomX
+### Examples
 
-API:
-      --api-worker-id=ID        custom worker-id for API
-      --api-id=ID               custom instance ID for API
-      --http-host=HOST          bind host for HTTP API (default: 127.0.0.1)
-      --http-port=N             bind port for HTTP API
-      --http-access-token=T     access token for HTTP API
-      --http-no-restricted      enable full remote access to HTTP API (only if access token set)
-
-OpenCL backend:
-      --opencl                  enable OpenCL mining backend
-      --opencl-devices=N        comma separated list of OpenCL devices to use
-      --opencl-platform=N       OpenCL platform index or name
-      --opencl-loader=PATH      path to OpenCL-ICD-Loader (OpenCL.dll or libOpenCL.so)
-      --opencl-no-cache         disable OpenCL cache
-      --print-platforms         print available OpenCL platforms and exit
-
-CUDA backend:
-      --cuda                    enable CUDA mining backend
-      --cuda-loader=PATH        path to CUDA plugin (xmrig-cuda.dll or libxmrig-cuda.so)
-      --cuda-devices=N          comma separated list of CUDA devices to use
-      --no-nvml                 disable NVML (NVIDIA Management Library) support
-
-Logging:
-  -S, --syslog                  use system log for output messages
-  -l, --log-file=FILE           log all output to a file
-      --print-time=N            print hashrate report every N seconds
-      --health-print-time=N     print health report every N seconds
-      --no-color                disable colored output
-
-Misc:
-  -c, --config=FILE             load a JSON-format configuration file
-  -B, --background              run the miner in the background
-  -V, --version                 output version information and exit
-  -h, --help                    display this help and exit
-      --dry-run                 test configuration and exit
-      --export-topology         export hwloc topology to a XML file and exit
+* x86_64-unknown-linux-gnu or x86_64-unknown-freebsd11
+```sh
+WITH_RANDOMX=1 WITH_ASM=1 WITH_HWLOC=1 WITH_LIBCPUID=1 CC=gcc CFLAGS="-march=ivybridge -g" CXX=g++ CXXFLAGS="-march=ivybridge -g" make -j 16
 ```
 
-## Donations
-* Default donation 5% (5 minutes in 100 minutes) can be reduced to 1% via option `donate-level` or disabled in source code.
-* XMR: `48edfHu7V9Z84YzzMa6fUueoELZ9ZRXq9VetWzYGzKt52XU5xvqgzYnDK9URnRoJMk1j8nLwEVsaSWJ4fhdUyZijBGUicoD`
-* BTC: `1P7ujsXeX7GxQwHNnJsRMgAdNkFZmNVqJT`
+* x86_64-apple-darwin16
+```sh
+WITH_RANDOMX=1 WITH_ASM=1 WITH_LIBCPUID=1 CC=clang CFLAGS=-march=native CXX=clang++ CXXFLAGS=-march=native make -j 4
+```
 
-## Contacts
-* support@xmrig.com
-* [reddit](https://www.reddit.com/user/XMRig/)
-* [twitter](https://twitter.com/xmrig_dev)
+* riscv64-unknown-linux-gnu
+```sh
+WITH_RANDOMX=1 WITH_RANDOMX_ASM=1 WITH_HWLOC=1 CC=gcc CFLAGS="-mcpu=sifive-u74 -g" CXX=g++ CXXFLAGS="-mcpu=sifive-u74 -g" make -j 4
+```
+
+* powerpc64-unknown-linux-gnu (No RandomX JIT compiler support)
+```sh
+WITH_RANDOMX=1 WITH_HWLOC=1 CC=gcc CFLAGS="-mcpu=power7 -g" CXX=g++ FLAGS="-mcpu=power7 -g" make -j 8
+```
