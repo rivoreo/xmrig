@@ -31,7 +31,7 @@ CFLAGS += $(DEFINES) $(INCLUDE_PATHS) -Wall -std=gnu99
 ifeq ($(filter -O%,$(CFLAGS)),)
 CFLAGS += -O3
 endif
-CXXFLAGS += $(DEFINES) $(INCLUDE_PATHS) -D _GLIBCXX_USE_NANOSLEEP=1 -D _GLIBCXX_USE_SCHED_YIELD=1 -Wall -std=gnu++0x -funroll-loops -fmerge-all-constants
+CXXFLAGS += $(DEFINES) $(INCLUDE_PATHS) -D _GLIBCXX_USE_NANOSLEEP=1 -D _GLIBCXX_USE_SCHED_YIELD=1 -Wall -std=gnu++11
 ifeq ($(filter -O%,$(CXXFLAGS)),)
 CXXFLAGS += -O3
 endif
