@@ -939,7 +939,7 @@ FORCE_INLINE int _mm_movemask_epi8(__m128i _a)
 	hi = vpadd_u8(hi, hi);
 	hi = vpadd_u8(hi, hi);
 
-	return ((hi[0] << 8) | (lo[0] & 0xFF));
+	return ((vget_lane_u8(hi, 0) << 8) | vget_lane_u8(lo, 0));
 }
 
 
