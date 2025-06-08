@@ -29,6 +29,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "crypto/randomx/vm_compiled.hpp"
 #include "crypto/randomx/common.hpp"
 
+#if defined __arm__ || defined __ARMEL__ || defined __arm64__ || defined __aarch64__ || defined __AARCH64EL__
+#define XMRIG_ARM
+#endif
+
 namespace randomx {
 
 	static_assert(sizeof(MemoryRegisters) == 2 * sizeof(addr_t) + sizeof(uintptr_t), "Invalid alignment of struct randomx::MemoryRegisters");

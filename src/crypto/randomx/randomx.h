@@ -35,6 +35,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <type_traits>
 #include "crypto/randomx/intrin_portable.h"
 
+#if defined __arm__ || defined __ARMEL__ || defined __arm64__ || defined __aarch64__ || defined __AARCH64EL__
+#define XMRIG_ARM
+#endif
+
 #define RANDOMX_HASH_SIZE 32
 #define RANDOMX_DATASET_ITEM_SIZE 64
 

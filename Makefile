@@ -48,6 +48,10 @@ GET_ARCH_COMMAND := arch=`uname -m` && case $$arch in amd64|x86_64) echo amd64; 
 ARCH := $(shell $(GET_ARCH_COMMAND))
 endif
 
+ifeq ($(ARCH),$(filter arm aarch64,$(ARCH)))
+CXXFLAGS += -flax-vector-conversions
+endif
+
 ifdef WITH_ASM
 WITH_CRYPTONIGHT_ASM := 1
 WITH_RANDOMX_ASM := 1
