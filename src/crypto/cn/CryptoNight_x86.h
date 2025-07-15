@@ -504,11 +504,19 @@ static inline __m128i int_sqrt_v2(const uint64_t n0)
     r >>= 19;
 
     uint64_t x2 = (s - (1022ULL << 32)) * (r - s - (1022ULL << 32) + 1);
-#   if (defined(_MSC_VER) || __GNUC__ > 7 || (__GNUC__ == 7 && __GNUC_MINOR__ > 1)) && (defined(__x86_64__) || defined(_M_AMD64))
-    _addcarry_u64(_subborrow_u64(0, x2, n0, (unsigned long long int*)&x2), r, 0, (unsigned long long int*)&r);
-#   else
+#if (defined(_MSC_VER) || (defined __INTEL_COMPILER && __INTEL_COMPILER >= 1200) || (!defined __INTEL_COMPILER && defined __GNUC__ && (__GNUC__ > 7 || (__GNUC__ == 7 && __GNUC_MINOR__ > 1)))) \
+      && (defined(__x86_64__) || defined(_M_AMD64))
+#ifdef __INTEL_COMPILER
+    unsigned __int64 *x2p = (unsigned __int64 *)&x2;
+    unsigned __int64 *rp = (unsigned __int64 *)&r;
+#else
+    unsigned long long int *x2p = (unsigned long long int *)&x2;
+    unsigned long long int *rp = (unsigned long long int *)&r;
+#endif
+    _addcarry_u64(_subborrow_u64(0, x2, n0, x2p), r, 0, rp);
+#else
     if (x2 < n0) ++r;
-#   endif
+#endif
 
     return _mm_cvtsi64_si128(r);
 }
