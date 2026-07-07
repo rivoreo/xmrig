@@ -18,7 +18,7 @@ This fork focuses only on RandomX CPU mining, on different CPU architectures and
 
 Building for architectures other than x86 and ARM requires **simde** headers, to help getting the currently mandatory CryptoNight code compiled; even if such code is not being used for running RandomX.
 
-This source tree uses **GNU Make** as the build system. You will need to set a series of environment variables when running **make(1)**. The available environment variables are:
+This source tree uses **GNU Make** as the build system. You will likely need to set a series of environment variables when running **make(1)**. The available environment variables are:
 
 Environment Variable   | Description
 ---------------------- | -----------------------------------------------------
@@ -38,6 +38,8 @@ Environment Variable   | Description
 `WITH_RANDOMX_ASM`     | Set this to include RandomX assembly codes that enable JIT compiler
 `WITH_RANDOMX_JIT`     | Synonym for `WITH_RANDOMX_ASM`
 `WITH_ASM`             | Shortcut for enabling both `WITH_CRYPTONIGHT_ASM` and `WITH_RANDOMX_ASM`
+
+If you get error messages similar to `error: inlining failed in call to always_inline '__m128i _mm_aeskeygenassist_si128(__m128i, int)': target specific option mismatch`, when compiling for x86, add option `-maes` to `CXXFLAGS`.
 
 ### Examples
 
