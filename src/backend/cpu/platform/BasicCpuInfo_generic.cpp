@@ -127,12 +127,12 @@ xmrig::BasicCpuInfo::BasicCpuInfo() :
 	if(!*m_brand) {
 #ifdef XMRIG_ARM
 #if defined __aarch64__ || defined __AARCH64EL__
-		memcpy(m_brand, "Unknown AArch64 processor", 23);
+		strcpy(m_brand, "Unknown AArch64 processor");
 #else
-		memcpy(m_brand, "Unknown ARM processor", 21);
+		strcpy(m_brand, "Unknown ARM processor");
 #endif
 #else
-		memcpy(m_brand, "Unknown", 7);
+		strcpy(m_brand, "Unknown");
 #endif
 	}
 
